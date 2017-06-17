@@ -1,0 +1,8 @@
+[config]
+race_html_path = "./html/race/"
+horse_html_path = "./html/horse/"
+oldest_date = 20170501  #いつのデータから取得するか
+
+[db]
+dbuser = "root"
+dbpass = "rootpass123"
