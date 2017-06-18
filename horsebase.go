@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"os"
 
@@ -75,7 +76,7 @@ func (hb *Horsebase) Run(args []string) int {
 			return 1
 		}
 
-		// 血統データ登録
+	// 血統データ登録
 	case "-reg_bloodtype":
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
@@ -88,7 +89,7 @@ func (hb *Horsebase) Run(args []string) int {
 			return 1
 		}
 
-		// レースデータのURLを取得しracelist.txtに一覧化する
+	// レースデータのURLを取得しracelist.txtに保存する
 	case "-make_list":
 		if err := hb.MakeRaceURLList(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
@@ -101,14 +102,12 @@ func (hb *Horsebase) Run(args []string) int {
 			return 1
 		}
 
-		// 5
 	case "-reg_racedata":
 		if err := hb.RegistRaceData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
 
-		//6
 	case "-reg_horsedata":
 		if err := hb.RegistHorseData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
@@ -123,6 +122,7 @@ func (hb *Horsebase) Run(args []string) int {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
 	case "-match_bloodtype":
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
@@ -135,6 +135,10 @@ func (hb *Horsebase) Run(args []string) int {
 			return 1
 		}
 
+	case "-help":
+		fmt.Println(help)
+		return 1
+
 	default:
 		PrintError(hb.Stderr, "Invalid Argument")
 		return 1
@@ -142,3 +146,17 @@ func (hb *Horsebase) Run(args []string) int {
 
 	return 0
 }
+
+var help = `usage: horsebase [options]
+
+Options:
+
+  -init_db          Create horsebase DB
+  -reg_bloodtype    Store the bloodtype data defined in bloodtype.toml in horsebase DB
+  -make_list        Save the URL of the race data in racelist.txt
+  -get_racehtml     Gets the HTML form the URL listed in racelist.txt
+  -reg_racedata     Scrape HTML and store race data in horsebase DB
+  -reg_horsedata    Scrape HTML and store horse data in horsebase DB
+  -drop_db          Delete horsebase DB
+  -match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.toml
+`
