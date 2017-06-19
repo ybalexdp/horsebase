@@ -85,7 +85,7 @@ type Jockey struct {
 
 // Stallion :種牡馬データ
 type Stallion struct {
-	Id             int    // ID
+	ID             int    // ID
 	Name           string // 種牡馬名
 	BloodTypeID    int    // 大系統
 	SubBloodTypeID int    //小系統
@@ -1182,31 +1182,31 @@ func (hb *Horsebase) regStallionInfo(name string) error {
 */
 
 func (hb *Horsebase) registDividendInfo(rd RaceData) {
-	for i, _ := range rd.Win.HorseNum {
+	for i := range rd.Win.HorseNum {
 		hb.DbInfo.InsertWinData(rd, i)
 	}
 
-	for i, _ := range rd.Place.HorseNum {
+	for i := range rd.Place.HorseNum {
 		hb.DbInfo.InsertPlaceData(rd, i)
 	}
 
-	for i, _ := range rd.Quinella.HorseNum {
+	for i := range rd.Quinella.HorseNum {
 		hb.DbInfo.InsertQuinellaData(rd, i)
 	}
 
-	for i, _ := range rd.Exacta.HorseNum {
+	for i := range rd.Exacta.HorseNum {
 		hb.DbInfo.InsertExactaData(rd, i)
 	}
 
-	for i, _ := range rd.QP.HorseNum {
+	for i := range rd.QP.HorseNum {
 		hb.DbInfo.InsertQPData(rd, i)
 	}
 
-	for i, _ := range rd.Trio.HorseNum {
+	for i := range rd.Trio.HorseNum {
 		hb.DbInfo.InsertTrioData(rd, i)
 	}
 
-	for i, _ := range rd.Trifecta.HorseNum {
+	for i := range rd.Trifecta.HorseNum {
 		hb.DbInfo.InsertTrifectaData(rd, i)
 	}
 
