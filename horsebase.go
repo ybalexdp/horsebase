@@ -14,8 +14,8 @@ const (
 	tlayout = "04:05.0"
 )
 
-// Horsebase :horsebase.tomlの[horsebase]のパラメータ値
-// を保持したオブジェクト
+// Horsebase :
+// horsebase.tomlの[horsebase]のパラメータ値を保持した構造体
 type Horsebase struct {
 	Config Config `toml:"config"`
 	DbInfo HBDB   `toml:"db"`
@@ -24,14 +24,15 @@ type Horsebase struct {
 }
 
 // Config :
-// horsebase.tomlで定義した設定値
-// を保持したオブジェクト
+// horsebase.tomlで定義した設定値を保持した構造体
 type Config struct {
 	RaceHtmlPath  string `toml:"race_html_path"`
 	HorseHtmlPath string `toml:"horse_html_path"`
 	OldestDate    int    `toml:"oldest_date"`
 }
 
+// HBDB :
+// DBアクセス用構造体
 type HBDB struct {
 	DbUser string `toml:"dbuser"`
 	DbPass string `toml:"dbpass"`
@@ -39,6 +40,8 @@ type HBDB struct {
 	tx     *sql.Tx
 }
 
+// New :
+// Horsebaseオブジェクト生成
 func (hb *Horsebase) New() *Horsebase {
 
 	hb = &Horsebase{
@@ -139,6 +142,13 @@ func (hb *Horsebase) Run(args []string) int {
 		fmt.Println(help)
 		return 1
 
+		// ワンコマンドでDB登録まで完了させる
+	case "-build":
+		if err := hb.Build(); err != nil {
+			PrintError(hb.Stderr, "%s", err)
+		}
+		return 1
+
 	default:
 		PrintError(hb.Stderr, "Invalid Argument")
 		return 1
@@ -147,9 +157,45 @@ func (hb *Horsebase) Run(args []string) int {
 	return 0
 }
 
+func (hb *Horsebase) Build() error {
+	var err error
+	hb.DbInfo = hb.DbInfo.New()
+	defer hb.DbInfo.db.Close()
+
+	if err = hb.DbInfo.InitDB(); err != nil {
+		return err
+	}
+
+	if err = hb.MakeRaceURLList(); err != nil {
+		return err
+	}
+
+	if err = hb.GetRaceHTML(); err != nil {
+		return err
+	}
+
+	if err = hb.RegistHorseData(); err != nil {
+		return err
+	}
+
+	if err = hb.RegistHorseData(); err != nil {
+		return err
+	}
+
+	var bt BloodTypeToml
+	bt = bt.New()
+
+	if err = bt.MatchBloodType(hb.DbInfo); err != nil {
+		return err
+	}
+
+	return err
+}
+
 var help = `usage: horsebase [options]
 
 Options:
+  -build            Stores all data
 
   -init_db          Create horsebase DB
   -reg_bloodtype    Store the bloodtype data defined in bloodtype.toml in horsebase DB
@@ -158,5 +204,5 @@ Options:
   -reg_racedata     Scrape HTML and store race data in horsebase DB
   -reg_horsedata    Scrape HTML and store horse data in horsebase DB
   -drop_db          Delete horsebase DB
-  -match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.toml
+  -match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.tomlh
 `
