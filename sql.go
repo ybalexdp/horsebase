@@ -29,30 +29,24 @@ func (hbdb HBDB) InitDB() error {
 	}
 	createDB(db)
 
-	dbcon, err := sql.Open("mysql", hbdb.DbUser+":"+hbdb.DbPass+"@/horsebase")
-	if err != nil {
-		return err
-	}
-	tx, err := dbcon.Begin()
+	db, err = sql.Open("mysql", hbdb.DbUser+":"+hbdb.DbPass+"@/horsebase")
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		if err := recover(); err != nil {
-			tx.Rollback()
-		}
-	}()
-
-	err = createTable(tx)
+	err = createTable(db)
 	if err != nil {
 		hbdb.DropDB()
 		return err
 	}
-	createIDX(tx)
-	tx.Commit()
 
-	defer dbcon.Close()
+	err = createIDX(db)
+	if err != nil {
+		hbdb.DropDB()
+		return err
+	}
+
+	defer db.Close()
 
 	return err
 
@@ -174,7 +168,8 @@ func createDB(db *sql.DB) error {
 	return err
 }
 
-func createTable(db *sql.Tx) error {
+func createTable(db *sql.DB) error {
+	var err error
 	query := `CREATE TABLE IF NOT EXISTS horsebase.racedata
 (id BIGINT NOT NULL PRIMARY KEY,
 name VARCHAR(20),
@@ -193,14 +188,20 @@ horsenum INT,
 age_gr INT,
 sex_gr INT)`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.bloodtype
 ( id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
 name VARCHAR(20)
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.stallion
 (id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -211,7 +212,10 @@ FOREIGN KEY(bloodtype_id) REFERENCES bloodtype(id) ON DELETE SET NULL,
 FOREIGN KEY(subbloodtype_id) REFERENCES bloodtype(id) ON DELETE SET NULL
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.horse
 (id INT NOT NULL PRIMARY KEY,
@@ -226,14 +230,20 @@ FOREIGN KEY(father_fm_id) REFERENCES stallion(id) ON DELETE SET NULL,
 FOREIGN KEY(father_mm_id) REFERENCES stallion(id) ON DELETE SET NULL
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.jockey
 (id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
 name VARCHAR(20)
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.raceresult
 (id BIGINT NOT NULL,
@@ -262,9 +272,8 @@ FOREIGN KEY(horse_id) REFERENCES horse(id) ON DELETE RESTRICT,
 FOREIGN KEY(jockey_id) REFERENCES jockey(id) ON DELETE SET NULL
 )`
 
-	err := execSQL(db, query)
+	_, err = db.Exec(query)
 	if err != nil {
-		fmt.Println("check")
 		return err
 	}
 
@@ -277,7 +286,10 @@ PRIMARY KEY(race_id, horse_number),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.place
 (race_id BIGINT NOT NULL,
@@ -288,7 +300,10 @@ PRIMARY KEY(race_id, horse_number),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.quinella
 (race_id BIGINT NOT NULL,
@@ -300,7 +315,10 @@ PRIMARY KEY(race_id, horse_number1, horse_number2),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.exacta
 (race_id BIGINT NOT NULL,
@@ -312,7 +330,10 @@ PRIMARY KEY(race_id, horse_number1, horse_number2),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.qp
 (race_id BIGINT NOT NULL,
@@ -324,7 +345,10 @@ PRIMARY KEY(race_id, horse_number1, horse_number2),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.trio
 (race_id BIGINT NOT NULL,
@@ -337,7 +361,10 @@ PRIMARY KEY(race_id, horse_number1, horse_number2, horse_number3),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.trifecta
 (race_id BIGINT NOT NULL,
@@ -350,121 +377,235 @@ PRIMARY KEY(race_id, horse_number1, horse_number2, horse_number3),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
 )`
 
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	return err
 
 }
 
-func createIDX(db *sql.Tx) {
+func createIDX(db *sql.DB) error {
+	var err error
 
 	query := "ALTER TABLE racedata ADD INDEX idx_racedata_id(id)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_name(name)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_course(course)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_corner(corner)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_distance(distance)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_grade(grade)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_turf(turf)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_surface(surface)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_weather(weather)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_track_cond(track_cond)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_horsenum(horsenum)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_age_gr(age_gr)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE racedata ADD INDEX idx_racedata_sex_gr(sex_gr)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE bloodtype ADD INDEX idx_bloodtype_id(id)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE bloodtype ADD INDEX idx_bloodtype_name(name)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE stallion ADD INDEX idx_stallion_id(id)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE stallion ADD INDEX idx_stallion_name(name)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE stallion ADD INDEX idx_stallion_bloodtype(bloodtype_id)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE stallion ADD INDEX idx_stallion_subbloodtype(subbloodtype_id)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE horse ADD INDEX idx_horse_name(name)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_rank(rank)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_popularity(popularity)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_age(age)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_weight(weight)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_bweight(bweight)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_horse_num(horse_num)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_waku_num(waku_num)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_last3f(last3f)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_sex(sex)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_time(time)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_diftime(diftime)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_po1(passing_order1)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_po2(passing_order2)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_po3(passing_order3)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_po4(passing_order4)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
 
 	query = "ALTER TABLE raceresult ADD INDEX idx_raceresult_belonging(belonging)"
-	execSQL(db, query)
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	return err
 
 }
 
@@ -480,14 +621,12 @@ func (hbdb HBDB) UpdateSubBloodMatch(bt string, stallion string) error {
 	return err
 }
 
-func execSQL(db *sql.Tx, query string) error {
+/*
+func execSQL(db *sql.DB, query string) error {
 	_, err := db.Exec(query)
-	if err != nil {
-		db.Rollback()
-		return err
-	}
 	return err
 }
+*/
 
 func (hbdb HBDB) GetId(table string, name string) (int, error) {
 	var id int
