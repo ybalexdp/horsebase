@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
 	"io"
@@ -118,10 +119,7 @@ func (hb *Horsebase) Run(args []string) int {
 		}
 
 	case "-drop_db":
-		hb.DbInfo = hb.DbInfo.New()
-		defer hb.DbInfo.db.Close()
-
-		if err := hb.DbInfo.DropDB(); err != nil {
+		if err := hb.Destroy(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
@@ -189,6 +187,35 @@ func (hb *Horsebase) Build() error {
 		return err
 	}
 
+	return err
+}
+
+func (hb *Horsebase) Destroy() error {
+	var err error
+
+	fmt.Println("All data will be deleted, is it OK?[y/n] ")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		input := scanner.Text()
+
+		switch input {
+		case "y":
+			fallthrough
+		case "Y":
+			hb.DbInfo = hb.DbInfo.New()
+			defer hb.DbInfo.db.Close()
+
+			if err = hb.DbInfo.DropDB(); err != nil {
+				return err
+			}
+
+		case "n":
+			fallthrough
+		case "N":
+			return err
+		}
+	}
 	return err
 }
 
