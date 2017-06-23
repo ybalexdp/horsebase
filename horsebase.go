@@ -85,10 +85,10 @@ func (hb *Horsebase) Run(args []string) int {
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
-		var bt BloodTypeToml
-		bt = bt.New()
+		var btt BloodTypeToml
+		btt = btt.New()
 
-		if err := bt.Btd.RegistBloodType(hb.DbInfo); err != nil {
+		if err := btt.Btd.RegistBloodType(hb.DbInfo); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
@@ -128,10 +128,10 @@ func (hb *Horsebase) Run(args []string) int {
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
-		var bt BloodTypeToml
-		bt = bt.New()
+		var btt BloodTypeToml
+		btt = btt.New()
 
-		if err := bt.MatchBloodType(hb.DbInfo); err != nil {
+		if err := btt.MatchBloodType(hb.DbInfo); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
@@ -180,10 +180,10 @@ func (hb *Horsebase) Build() error {
 		return err
 	}
 
-	var bt BloodTypeToml
-	bt = bt.New()
+	var btt BloodTypeToml
+	btt = btt.New()
 
-	if err = bt.MatchBloodType(hb.DbInfo); err != nil {
+	if err = btt.MatchBloodType(hb.DbInfo); err != nil {
 		return err
 	}
 

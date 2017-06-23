@@ -30,9 +30,9 @@ func (btt BloodTypeToml) New() BloodTypeToml {
 	return btt
 }
 
-func (bt BloodTypeDefine) RegistBloodType(hbdb HBDB) error {
+func (btd BloodTypeDefine) RegistBloodType(hbdb HBDB) error {
 	var err error
-	for _, btname := range bt.Bloodtypes {
+	for _, btname := range btd.Bloodtypes {
 
 		err = hbdb.InsertBloodType(btname)
 		if err != nil {
