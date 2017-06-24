@@ -42,18 +42,20 @@ bloodtypes = [
   [mainbloodtypes.'サンデーサイレンス系']
   stallions = [
     'アグネスタキオン',
+    'アドマイヤオーラ',
     'アドマイヤジャパン',
+    'アドマイヤボス',
     'アドマイヤマックス',
     'アンライバルド',
     'ヴィクトワールピサ',
+    'オレハマッテルゼ',
     'ゴールドアリュール',
     'スペシャルウィーク',
     'ダンスインザダーク',
     'ディープインパクト',
+    'ネオユニヴァース',
     'フジキセキ',
     'ブラックタイド',
-    'ネオユニヴァース',
-    'アドマイヤボス',
     'ダイワメジャー',
     'カネヒキリ',
     'ディープインパクト',
@@ -78,8 +80,10 @@ bloodtypes = [
   stallions = [
     'アドマイヤコジーン',
     'エアジハード',
+    'ジャッジアンジェルーチ',
     'テスコボーイ',
     'トニービン',
+    'バゴ',
     'ミルジョージ',
     'Cozzene',
     'Dashing Blade',
@@ -90,14 +94,16 @@ bloodtypes = [
     'Rahy',
     'Rainbow Quest',
     'Risen Star',
-    'Runaway Groom'
+    'Runaway Groom',
+    'Slewpy'
   ]
 
   [mainbloodtypes.'ネイティヴダンサー系']
   stallions = [
     'Affirmed',
     'American Post',
-    'Bering'
+    'Bering',
+    'Kris'
   ]
 
   [mainbloodtypes.'ノーザンダンサー系']
@@ -108,24 +114,32 @@ bloodtypes = [
     'ジャイアンツコーズウェイ',
     'シングスピール',
     'スニッツェル',
+    'タヤスレミグラン',
     'ダンシングブレーヴ',
     'チーフベアハート',
     'デインヒル',
     'ノーザンテースト',
     'ハービンジャー',
     'パントレセレブル',
+    'ファルブラヴ',
     'フランケル',
+    'フレンチデピュティ',
     'マルゼンスキー',
     'ローエングリン',
     'ロックオブジブラルタル',
     'Alzao',
+    'Caerleon',
     'Cape Cross',
     "Chief's Crown",
+    'Dayjur',
     'Deputy Minister',
     'Frankel',
+    'Invincible Spirit',
     'Lyphard',
+    'Niniski',
     'Nijinsky',
     'Nureyev',
+    'Salt Lake',
     'Storm Boot',
     'Storm Cat'
   ]
@@ -145,15 +159,19 @@ bloodtypes = [
     'キングカメハメハ',
     'サウスヴィグラス',
     'スウェプトオーヴァーボード',
-    'フォーティナイナー',
     'ティンバーカントリー',
+    'フォーティナイナー',
+    'マイネルラヴ',
     'Crafty Prospector',
     'Dubai Millennium',
     'Fappiano',
+    'Gone West',
     'Kingmambo',
     'Hussonet',
     'Machiavellian',
+    'Miswaki',
     'Mr. Prospector',
+    'Seeking the Gold',
     'Smart Strike'
   ]
 
@@ -170,7 +188,9 @@ bloodtypes = [
   [subbloodtypes.'ヴァイスリージェント系']
   stallions = [
     'クロフネ',
-    'Deputy Minister'
+    'フレンチデピュティ',
+    'Deputy Minister',
+    'Salt Lake'
   ]
 
   [subbloodtypes.'エーピーインディ系']
@@ -202,7 +222,7 @@ bloodtypes = [
   stallions = [
     'シングスピール',
     'フランケル',
-    'ローエングリン'
+    'ローエングリン',
     'Frankel'
   ]
 
@@ -243,7 +263,9 @@ bloodtypes = [
     'ハービンジャー',
     'ロックオブジブラルタル',
     'Cape Cross',
-    "Chief's Crown"
+    "Chief's Crown",
+    'Dayjur',
+    'Invincible Spirit'
   ]
 
   [subbloodtypes.'ディープインパクト系']
@@ -255,6 +277,8 @@ bloodtypes = [
   [subbloodtypes.'ニジンスキー系']
   stallions = [
     'マルゼンスキー',
+    'Caerleon',
+    'Niniski',
     'Nijinsky'
   ]
 
@@ -268,7 +292,8 @@ bloodtypes = [
   stallions = [
     'Affirmed',
     'American Post',
-    'Bering'
+    'Bering',
+    'Kris'
   ]
 
   [subbloodtypes.'ネヴァーベンド系']
@@ -277,6 +302,12 @@ bloodtypes = [
     'Dashing Blade',
     'Garde Royale',
     'Loup Sauvage'
+  ]
+
+  [subbloodtypes.'ノーザンダンサー系']
+  stallions = [
+    'タヤスレミグラン',
+    'ファルブラヴ'
   ]
 
   [subbloodtypes.'ノーザンテースト系']
@@ -306,27 +337,41 @@ bloodtypes = [
 
   [subbloodtypes.'ボールドルーラー系']
   stallions = [
-    'Risen Star'
+    'ジャッジアンジェルーチ',
+    'Risen Star',
+    'Slewpy'
   ]
 
   [subbloodtypes.'ミスタープロスペクター系']
   stallions = [
     'アグネスデジタル',
     'ティンバーカントリー',
+    'マイネルラヴ',
     'Crafty Prospector',
     'Dubai Millennium',
     'Fappiano',
+    'Gone West',
     'Hussonet',
     'Machiavellian',
+    'Miswaki',
     'Mr. Prospector',
+    'Seeking the Gold',
     'Smart Strike'
   ]
 
   [subbloodtypes.'レッドゴッド系']
   stallions = [
+    'バゴ',
     'Rahy',
     'Rainbow Quest',
     'Runaway Groom'
+  ]
+
+  [subbloodtypes.'Dサンデー系']
+  stallions = [
+    'ゴールドアリュール',
+    'ネオユニヴァース',
+    'カネヒキリ'
   ]
 
   [subbloodtypes.'Lサンデー系']
@@ -337,16 +382,11 @@ bloodtypes = [
 
   [subbloodtypes.'Pサンデー系']
   stallions = [
+    'アドマイヤオーラ',
     'アドマイヤマックス',
+    'オレハマッテルゼ',
     'ダイワメジャー',
     'フジキセキ'
-  ]
-
-  [subbloodtypes.'Dサンデー系']
-  stallions = [
-    'ゴールドアリュール',
-    'ネオユニヴァース',
-    'カネヒキリ'
   ]
 
   [subbloodtypes.'Tサンデー系']
