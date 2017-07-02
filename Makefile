@@ -3,9 +3,9 @@ VERSION := 0.1
 LDFLAGS := -X 'main.version=$(VERSION)
 
 setup:
-  go get github.com/Masterminds/glide
-  go get github.com/golang/lint/golint
-  go get golang.org/x/tools/cmd/goimports
+	go get github.com/Masterminds/glide
+	go get github.com/golang/lint/golint
+	go get golang.org/x/tools/cmd/goimports
 
 glide:
 ifeq ($(shell command -v glide 2> /dev/null),)
