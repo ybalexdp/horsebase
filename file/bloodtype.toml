@@ -1,7 +1,7 @@
 [bloodtype]
 bloodtypes = [
+  'ヴァイスリージェント系',
   'エーピーインディ系',
-  'エンドスウィープ系',
   'キングマンボ系',
   'グレイソヴリン系',
   'サンデーサイレンス系',
@@ -9,17 +9,18 @@ bloodtypes = [
   'ナスルーラ系',
   'フォーティナイナー系',
   'ボールドルーラー系',
+  'マイバブー系',
   'ミスタープロスペクター系',
   'ロベルト系',
   'プリンスリーギフト系',
   'ノーザンダンサー系',
   'ヘイロー系',
+  'リボー系',
   'レッドゴッド系',
   'Pサンデー系',
   'Lサンデー系',
   'Dサンデー系',
   'Tサンデー系',
-  'ヴァイスリージェント系',
   'ディープインパクト系',
   'ダンチヒ系',
   'サドラーズウェルズ系',
@@ -49,6 +50,7 @@ bloodtypes = [
     'アンライバルド',
     'ヴィクトワールピサ',
     'オレハマッテルゼ',
+    'キンシャサノキセキ',
     'ゴールドアリュール',
     'スペシャルウィーク',
     'ダンスインザダーク',
@@ -68,7 +70,10 @@ bloodtypes = [
   [mainbloodtypes.'セントサイモン系']
   stallions = [
     'Le Fabuleux',
-    'Speak John'
+    'Pleasant Colony',
+    'Siphon',
+    'Speak John',
+    'Stalwart'
   ]
 
   [mainbloodtypes.'ダマスカス系']
@@ -80,11 +85,13 @@ bloodtypes = [
   stallions = [
     'アドマイヤコジーン',
     'エアジハード',
+    'サクラバクシンオー',
     'ジャッジアンジェルーチ',
     'テスコボーイ',
     'トニービン',
     'バゴ',
     'ミルジョージ',
+    'Capote',
     'Cozzene',
     'Dashing Blade',
     'Garde Royale',
@@ -125,6 +132,7 @@ bloodtypes = [
     'フランケル',
     'フレンチデピュティ',
     'マルゼンスキー',
+    'ヨハネスブルグ',
     'ローエングリン',
     'ロックオブジブラルタル',
     'Alzao',
@@ -134,20 +142,28 @@ bloodtypes = [
     'Dayjur',
     'Deputy Minister',
     'Frankel',
+    'Ghostzapper',
     'Invincible Spirit',
     'Lyphard',
     'Niniski',
     'Nijinsky',
     'Nureyev',
+    'Pivotal',
     'Salt Lake',
     'Storm Boot',
-    'Storm Cat'
+    'Storm Cat',
+    'Summer Squall'
   ]
 
   [mainbloodtypes.'ヘイロー系']
   stallions = [
     'タイキシャトル',
     'ロージズインメイ'
+  ]
+
+  [mainbloodtypes.'マイバブー系']
+  stallions = [
+    'サクラショウリ'
   ]
 
   [mainbloodtypes.'ミスタープロスペクター系']
@@ -162,6 +178,7 @@ bloodtypes = [
     'ティンバーカントリー',
     'フォーティナイナー',
     'マイネルラヴ',
+    'Belgravia',
     'Crafty Prospector',
     'Dubai Millennium',
     'Fappiano',
@@ -171,8 +188,10 @@ bloodtypes = [
     'Machiavellian',
     'Miswaki',
     'Mr. Prospector',
+    'Pioneerof the Nile',
     'Seeking the Gold',
-    'Smart Strike'
+    'Smart Strike',
+    'Unbridled'
   ]
 
   [mainbloodtypes.'ロベルト系']
@@ -180,7 +199,9 @@ bloodtypes = [
     'アーネストリー',
     'グラスワンダー',
     'シンボリクリスエス',
-    'タニノギムレット'
+    'タニノギムレット',
+    'Dynaformer',
+    'Silver Hawk'
   ]
 
 [subbloodtypes]
@@ -190,17 +211,13 @@ bloodtypes = [
     'クロフネ',
     'フレンチデピュティ',
     'Deputy Minister',
+    'Ghostzapper',
     'Salt Lake'
   ]
 
   [subbloodtypes.'エーピーインディ系']
   stallions = [
     'Pulpit'
-  ]
-
-  [subbloodtypes.'エンドスウィープ系']
-  stallions = [
-    'アドマイヤムーン'
   ]
 
   [subbloodtypes.'キングマンボ系']
@@ -239,13 +256,16 @@ bloodtypes = [
   [subbloodtypes.'ストームバード系']
   stallions = [
     'ジャイアンツコーズウェイ',
+    'ヨハネスブルグ',
     'Storm Boot',
-    'Storm Cat'
+    'Storm Cat',
+    'Summer Squall'
   ]
 
   [subbloodtypes.'セントサイモン系']
   stallions = [
     'Le Fabuleux',
+    'Siphon',
     'Speak John'
   ]
 
@@ -285,7 +305,8 @@ bloodtypes = [
   [subbloodtypes.'ヌレイエフ系']
   stallions = [
     'パントレセレブル',
-    'Nureyev'
+    'Nureyev',
+    'Pivotal'
   ]
 
   [subbloodtypes.'ネイティヴダンサー系']
@@ -318,6 +339,7 @@ bloodtypes = [
 
   [subbloodtypes.'フォーティナイナー系']
   stallions = [
+    'アドマイヤムーン',
     'サウスヴィグラス',
     'スウェプトオーヴァーボード',
     'フォーティナイナー'
@@ -326,6 +348,7 @@ bloodtypes = [
   [subbloodtypes.'プリンスリーギフト系']
   stallions = [
     'エアジハード',
+    'サクラバクシンオー',
     'テスコボーイ'
   ]
 
@@ -338,8 +361,14 @@ bloodtypes = [
   [subbloodtypes.'ボールドルーラー系']
   stallions = [
     'ジャッジアンジェルーチ',
+    'Capote',
     'Risen Star',
     'Slewpy'
+  ]
+
+  [subbloodtypes.'マイバブー系']
+  stallions = [
+    'サクラショウリ'
   ]
 
   [subbloodtypes.'ミスタープロスペクター系']
@@ -347,6 +376,7 @@ bloodtypes = [
     'アグネスデジタル',
     'ティンバーカントリー',
     'マイネルラヴ',
+    'Belgravia',
     'Crafty Prospector',
     'Dubai Millennium',
     'Fappiano',
@@ -355,8 +385,16 @@ bloodtypes = [
     'Machiavellian',
     'Miswaki',
     'Mr. Prospector',
+    'Pioneerof the Nile',
     'Seeking the Gold',
-    'Smart Strike'
+    'Smart Strike',
+    'Unbridled'
+  ]
+
+  [subbloodtypes.'リボー系']
+  stallions = [
+    'Pleasant Colony',
+    'Stalwart'
   ]
 
   [subbloodtypes.'レッドゴッド系']
@@ -382,9 +420,11 @@ bloodtypes = [
 
   [subbloodtypes.'Pサンデー系']
   stallions = [
+    'アグネスタキオン',
     'アドマイヤオーラ',
     'アドマイヤマックス',
     'オレハマッテルゼ',
+    'キンシャサノキセキ',
     'ダイワメジャー',
     'フジキセキ'
   ]
@@ -414,5 +454,7 @@ bloodtypes = [
   stallions = [
     'グラスワンダー',
     'シンボリクリスエス',
-    'タニノギムレット'
+    'タニノギムレット',
+    'Dynaformer',
+    'Silver Hawk'
   ]

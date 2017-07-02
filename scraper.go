@@ -545,7 +545,7 @@ func (hb *Horsebase) RegistRaceData() error {
 
 				// getHorseData内でHTTP GETするため
 				// インターバルをおく
-				time.Sleep(50 * time.Millisecond)
+				time.Sleep(10 * time.Millisecond)
 
 				err = hb.getHorseData(horse.HorseID)
 				if err != nil {

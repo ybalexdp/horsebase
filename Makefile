@@ -28,9 +28,6 @@ install:
 test:
 	go test $$(glide novendor)
 
-update: setup
-	glide update
-
 ## Lint
 lint: setup
 	go vet $$(glide novendor)

@@ -19,6 +19,7 @@ func Test_GetRaceHTML(t *testing.T) {
 	}
 }
 
+/*
 func Test_MakeRaceURLList(t *testing.T) {
 	hb := &Horsebase{}
 	hb = hb.New()
@@ -28,6 +29,7 @@ func Test_MakeRaceURLList(t *testing.T) {
 		t.Fatalf("MakeRaceURLList error:%s", err)
 	}
 }
+*/
 
 func Test_RegistHorseData(t *testing.T) {
 	hb := &Horsebase{}
@@ -100,5 +102,23 @@ func Test_calcDifTime(t *testing.T) {
 	if 0 > result.DifTime {
 		t.Fatalf("calcDifTime error:%s", err)
 		t.Fatalf("Diftime:%f", result.DifTime)
+	}
+}
+
+func Test_checkOldestData(t *testing.T) {
+
+	hb := &Horsebase{}
+	hb = hb.New()
+
+	if !hb.checkOldestData("/?pid=race_top&date=20170506") {
+		t.Fatalf("checkOldestData error")
+	}
+}
+
+func Test_convAgeGr(t *testing.T) {
+
+	agegr := convAgeGr("2歳")
+	if agegr != AgeGrTwo {
+		t.Fatalf("convAgeGr error:%d", agegr)
 	}
 }

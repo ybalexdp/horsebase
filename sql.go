@@ -53,6 +53,7 @@ func (hbdb HBDB) InitDB() error {
 }
 
 func (hbdb HBDB) DropDB() error {
+
 	query := "DROP DATABASE	horsebase"
 	_, err := hbdb.db.Exec(query)
 	return err
