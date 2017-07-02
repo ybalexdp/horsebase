@@ -17,7 +17,7 @@ deps: setup
 
 ## Update dependencies
 update: setup
-  glide update
+	glide update
 
 build:
 	go build -ldflags "$(LDFLAGS)"　-o bin/horsebase
@@ -33,9 +33,9 @@ update: setup
 
 ## Lint
 lint: setup
-	 go vet $$(glide novendor)
-	 for pkg in $$(glide novendor -x); do \
-	   golint --set_exit_status $$pkg || exit $$?; \
-	 done
+	go vet $$(glide novendor)
+	for pkg in $$(glide novendor -x); do \
+		golint --set_exit_status $$pkg || exit $$?; \
+	done
 
 .PHONY: setup deps build install update test lint
