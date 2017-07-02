@@ -1,0 +1,13 @@
+package: github.com/ybalexdp/horsebase
+import:
+- package: github.com/BurntSushi/toml
+  version: v0.3.0
+- package: github.com/PuerkitoBio/goquery
+  version: v1.1.0
+- package: github.com/go-sql-driver/mysql
+  version: v1.3
+- package: github.com/mitchellh/colorstring
+- package: golang.org/x/text
+  subpackages:
+  - encoding/japanese
+  - transform
