@@ -19,13 +19,13 @@ deps: setup
 update: setup
 	glide update
 
-build:
-	go build -ldflags "$(LDFLAGS)"　-o bin/horsebase
+build: deps
+	go build -o bin/horsebase
 
-install:
+install: build
 	go install
 
-test:
+test: deps
 	go test $$(glide novendor)
 
 ## Lint
