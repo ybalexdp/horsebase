@@ -15,7 +15,7 @@ Other installation methods(ex. go get) will be supported in the future.
 
 # Configuration File
 `horsebase` provides a configuration file in toml format.
-* file/horsebase.toml(#horsebase.toml)
+* file/horsebase.toml(#horsebasetoml)
 * file/bloodtype.toml(#bloodtype.toml)
 
 ## horsebase.toml
