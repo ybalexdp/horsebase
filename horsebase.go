@@ -231,5 +231,5 @@ Options:
   --reg_racedata     Scrape HTML and store race data in horsebase DB
   --reg_horsedata    Scrape HTML and store horse data in horsebase DB
   --drop_db          Delete horsebase DB
-  --match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.tomlh
+  --match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.toml
 `
