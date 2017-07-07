@@ -11,9 +11,9 @@ $ horsebase -build
 
 # install
 Build by yourself.  
-`  
+```bash
 $ make install  
-`  
+```  
 
 Other installation methods(ex. go get) will be supported in the future.  
 
@@ -27,37 +27,38 @@ Other installation methods(ex. go get) will be supported in the future.
 #### config
 You can specify the start date of the data to be stored.
 
-`[config]  
+```bash
+[config]  
 ~~~
 oldest_date=20070101  
 ~~~
-`  
+```
 
 #### db
 You can set the database username and password.  
 
-`  
+```bash
 [db]  
 dbuser = "$username"  
 dbpass = "$password"  
-`
+```
 
 ## bloodtype.toml
 You can customize the pedigree information and register it in the database.  
 
 You can define the lineage.  
 
-`  
+```bash
 [bloodtype]  
 bloodtypes = [  
   'AAA系',  
   ~~~  
 ]  
-`  
+```
 
 You can define main blood-type and sub blood-type and you can map stallions to it.
 
-`  
+```bash
 [mainbloodtypes]  
 
   [mainbloodtypes.'AAA系']  
@@ -85,13 +86,12 @@ You can define main blood-type and sub blood-type and you can map stallions to i
 
   ~~~~  
 
-`
+```
 
 `horsebase` provides templates and you can use it.
 
 # Command Line Options
-`  
-
+```bash
 --build            Stores all data  
 
 --init_db          Create horsebase DB  
@@ -103,4 +103,4 @@ You can define main blood-type and sub blood-type and you can map stallions to i
 --drop_db          Delete horsebase DB  
 --match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.toml  
 
-`  
+```
