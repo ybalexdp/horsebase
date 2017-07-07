@@ -71,7 +71,7 @@ func (hb *Horsebase) Run(args []string) int {
 	switch param {
 	// DB構築
 	// 初回起動
-	case "-init_db":
+	case "--init_db":
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
@@ -81,7 +81,7 @@ func (hb *Horsebase) Run(args []string) int {
 		}
 
 	// 血統データ登録
-	case "-reg_bloodtype":
+	case "--reg_bloodtype":
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
@@ -94,37 +94,37 @@ func (hb *Horsebase) Run(args []string) int {
 		}
 
 	// レースデータのURLを取得しracelist.txtに保存する
-	case "-make_list":
+	case "--make_list":
 		if err := hb.MakeRaceURLList(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
 
-	case "-get_racehtml":
+	case "--get_racehtml":
 		if err := hb.GetRaceHTML(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
 
-	case "-reg_racedata":
+	case "--reg_racedata":
 		if err := hb.RegistRaceData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
 
-	case "-reg_horsedata":
+	case "--reg_horsedata":
 		if err := hb.RegistHorseData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
 
-	case "-drop_db":
+	case "--drop_db":
 		if err := hb.Destroy(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
 
-	case "-match_bloodtype":
+	case "--match_bloodtype":
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
@@ -136,12 +136,12 @@ func (hb *Horsebase) Run(args []string) int {
 			return 1
 		}
 
-	case "-help":
+	case "--help":
 		fmt.Println(help)
 		return 1
 
 		// ワンコマンドでDB登録まで完了させる
-	case "-build":
+	case "--build":
 		if err := hb.Build(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 		}
@@ -222,14 +222,14 @@ func (hb *Horsebase) Destroy() error {
 var help = `usage: horsebase [options]
 
 Options:
-  -build            Stores all data
+  --build            Stores all data
 
-  -init_db          Create horsebase DB
-  -reg_bloodtype    Store the bloodtype data defined in bloodtype.toml in horsebase DB
-  -make_list        Save the URL of the race data in racelist.txt
-  -get_racehtml     Gets the HTML form the URL listed in racelist.txt
-  -reg_racedata     Scrape HTML and store race data in horsebase DB
-  -reg_horsedata    Scrape HTML and store horse data in horsebase DB
-  -drop_db          Delete horsebase DB
-  -match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.tomlh
+  --init_db          Create horsebase DB
+  --reg_bloodtype    Store the bloodtype data defined in bloodtype.toml in horsebase DB
+  --make_list        Save the URL of the race data in racelist.txt
+  --get_racehtml     Gets the HTML form the URL listed in racelist.txt
+  --reg_racedata     Scrape HTML and store race data in horsebase DB
+  --reg_horsedata    Scrape HTML and store horse data in horsebase DB
+  --drop_db          Delete horsebase DB
+  --match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.tomlh
 `
