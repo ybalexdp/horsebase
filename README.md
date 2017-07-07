@@ -92,15 +92,15 @@ You can define main blood-type and sub blood-type and you can map stallions to i
 
 # Command Line Options
 ```bash
---build            Stores all data  
+--build            # Stores all data  
 
---init_db          Create horsebase DB  
---reg_bloodtype    Store the bloodtype data defined in bloodtype.toml in horsebase DB  
---make_list        Save the URL of the race data in racelist.txt  
---get_racehtml     Gets the HTML form the URL listed in racelist.txt  
---reg_racedata     Scrape HTML and store race data in horsebase DB  
---reg_horsedata    Scrape HTML and store horse data in horsebase DB  
---drop_db          Delete horsebase DB  
---match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.toml  
+--init_db          # Create horsebase DB  
+--reg_bloodtype    # Store the bloodtype data defined in bloodtype.toml in horsebase DB  
+--make_list        # Save the URL of the race data in racelist.txt  
+--get_racehtml     # Gets the HTML form the URL listed in racelist.txt  
+--reg_racedata     # Scrape HTML and store race data in horsebase DB  
+--reg_horsedata    # Scrape HTML and store horse data in horsebase DB  
+--drop_db          # Delete horsebase DB  
+--match_bloodtype  # Map bloodtype data and stallion data defined in bloodtype.toml  
 
 ```
