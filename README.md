@@ -5,9 +5,9 @@ horsebase
 
 # Usage
 `horsebase` stores the horse racing data in the database by executing the following command.  
-`  
-$ horsebase -build  
-`  
+```bash
+$ horsebase -build
+```  
 
 # install
 Build by yourself.  
@@ -27,11 +27,10 @@ Other installation methods(ex. go get) will be supported in the future.
 #### config
 You can specify the start date of the data to be stored.
 
-`  
-[config]  
-~~~  
+`[config]  
+~~~
 oldest_date=20070101  
-~~~  
+~~~
 `  
 
 #### db
@@ -103,5 +102,5 @@ You can define main blood-type and sub blood-type and you can map stallions to i
 --reg_horsedata    Scrape HTML and store horse data in horsebase DB  
 --drop_db          Delete horsebase DB  
 --match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.toml  
-  
+
 `  
