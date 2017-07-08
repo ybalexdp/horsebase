@@ -24,7 +24,7 @@ Other installation methods(ex. go get) will be supported in the future.
 
 ## horsebase.toml
 
-#### config
+### config
 You can specify the start date of the data to be stored.
 
 ```bash
@@ -34,7 +34,7 @@ oldest_date=20070101
 ~~~
 ```
 
-#### db
+### db
 You can set the database username and password.  
 
 ```bash
@@ -92,15 +92,15 @@ You can define main blood-type and sub blood-type and you can map stallions to i
 
 # Command Line Options
 ```bash
---build            # Stores all data  
+--build,-b            # Stores all data  
 
---init_db          # Create horsebase DB  
---reg_bloodtype    # Store the bloodtype data defined in bloodtype.toml in horsebase DB  
---make_list        # Save the URL of the race data in racelist.txt  
---get_racehtml     # Gets the HTML form the URL listed in racelist.txt  
---reg_racedata     # Scrape HTML and store race data in horsebase DB  
---reg_horsedata    # Scrape HTML and store horse data in horsebase DB  
---drop_db          # Delete horsebase DB  
---match_bloodtype  # Map bloodtype data and stallion data defined in bloodtype.toml  
+--init_db,-i          # Create horsebase DB  
+--reg_bloodtype       # Store the bloodtype data defined in bloodtype.toml in horsebase DB  
+--list,-l             # Save the URL of the race data in racelist.txt  
+--get_racehtml        # Gets the HTML form the URL listed in racelist.txt  
+--reg_racedata        # Scrape HTML and store race data in horsebase DB  
+--reg_horsedata       # Scrape HTML and store horse data in horsebase DB  
+--drop_db,-d          # Delete horsebase DB  
+--match_bloodtype,-m  # Map bloodtype data and stallion data defined in bloodtype.toml  
 
 ```
