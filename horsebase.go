@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -61,17 +62,56 @@ func (hb *Horsebase) New() *Horsebase {
 
 func (hb *Horsebase) Run(args []string) int {
 
-	if len(os.Args) < 2 {
+	if len(args) != 2 {
 		PrintError(hb.Stderr, "Invalid Argument")
 		os.Exit(1)
 	}
 
-	param := os.Args[1]
+	var (
+		initdb   bool
+		regblood bool
+		list     bool
+		gethtml  bool
+		regrace  bool
+		reghorse bool
+		dropdb   bool
+		match    bool
+		build    bool
+	)
 
-	switch param {
-	// DB構築
-	// 初回起動
-	case "--init_db":
+	//f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+	flag.Usage = func() {
+		fmt.Println(help)
+	}
+	flag.BoolVar(&initdb, "init_db", false, "")
+	flag.BoolVar(&initdb, "i", false, "")
+
+	flag.BoolVar(&regblood, "reg_bloodtype", false, "")
+
+	flag.BoolVar(&list, "list", false, "")
+	flag.BoolVar(&list, "l", false, "")
+
+	flag.BoolVar(&gethtml, "get_racehtml", false, "")
+
+	flag.BoolVar(&regrace, "reg_racedata", false, "")
+
+	flag.BoolVar(&reghorse, "reg_horsedata", false, "")
+
+	flag.BoolVar(&dropdb, "drop_db", false, "")
+	flag.BoolVar(&dropdb, "d", false, "")
+
+	flag.BoolVar(&match, "match_bloodtype", false, "")
+	flag.BoolVar(&match, "m", false, "")
+
+	flag.BoolVar(&build, "build", false, "")
+	flag.BoolVar(&build, "b", false, "")
+
+	flag.Parse()
+
+	if initdb {
+		// DB構築
+		// 初回起動
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
@@ -79,9 +119,8 @@ func (hb *Horsebase) Run(args []string) int {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
-
-	// 血統データ登録
-	case "--reg_bloodtype":
+	} else if regblood {
+		// 血統データ登録
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
@@ -92,39 +131,35 @@ func (hb *Horsebase) Run(args []string) int {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
-
-	// レースデータのURLを取得しracelist.txtに保存する
-	case "--make_list":
+	} else if list {
+		// レースデータのURLを取得しracelist.txtに保存する
 		if err := hb.MakeRaceURLList(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+	} else if gethtml {
 
-	case "--get_racehtml":
 		if err := hb.GetRaceHTML(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
-
-	case "--reg_racedata":
+	} else if regrace {
 		if err := hb.RegistRaceData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+	} else if reghorse {
 
-	case "--reg_horsedata":
 		if err := hb.RegistHorseData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
-
-	case "--drop_db":
-		if err := hb.Destroy(); err != nil {
+	} else if dropdb {
+		if err := hb.destroy(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
-
-	case "--match_bloodtype":
+	} else if match {
 		hb.DbInfo = hb.DbInfo.New()
 		defer hb.DbInfo.db.Close()
 
@@ -136,18 +171,12 @@ func (hb *Horsebase) Run(args []string) int {
 			return 1
 		}
 
-	case "--help":
-		fmt.Println(help)
-		return 1
-
-		// ワンコマンドでDB登録まで完了させる
-	case "--build":
-		if err := hb.Build(); err != nil {
+	} else if build {
+		if err := hb.build(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 		}
 		return 1
-
-	default:
+	} else {
 		PrintError(hb.Stderr, "Invalid Argument")
 		return 1
 	}
@@ -155,7 +184,7 @@ func (hb *Horsebase) Run(args []string) int {
 	return 0
 }
 
-func (hb *Horsebase) Build() error {
+func (hb *Horsebase) build() error {
 	var err error
 	hb.DbInfo = hb.DbInfo.New()
 	defer hb.DbInfo.db.Close()
@@ -190,7 +219,7 @@ func (hb *Horsebase) Build() error {
 	return err
 }
 
-func (hb *Horsebase) Destroy() error {
+func (hb *Horsebase) destroy() error {
 	var err error
 
 	fmt.Println("All data will be deleted, is it OK?[y/n] ")
@@ -222,14 +251,14 @@ func (hb *Horsebase) Destroy() error {
 var help = `usage: horsebase [options]
 
 Options:
-  --build            Stores all data
+  --build,-b            Stores all data
 
-  --init_db          Create horsebase DB
-  --reg_bloodtype    Store the bloodtype data defined in bloodtype.toml in horsebase DB
-  --make_list        Save the URL of the race data in racelist.txt
-  --get_racehtml     Gets the HTML form the URL listed in racelist.txt
-  --reg_racedata     Scrape HTML and store race data in horsebase DB
-  --reg_horsedata    Scrape HTML and store horse data in horsebase DB
-  --drop_db          Delete horsebase DB
-  --match_bloodtype  Map bloodtype data and stallion data defined in bloodtype.toml
+  --init_db,-i          Create horsebase DB
+  --reg_bloodtype       Store the bloodtype data defined in bloodtype.toml in horsebase DB
+  --make_list,-l        Save the URL of the race data in racelist.txt
+  --get_racehtml        Gets the HTML form the URL listed in racelist.txt
+  --reg_racedata        Scrape HTML and store race data in horsebase DB
+  --reg_horsedata       Scrape HTML and store horse data in horsebase DB
+  --drop_db,-d          Delete horsebase DB
+  --match_bloodtype.-m  Map bloodtype data and stallion data defined in bloodtype.toml
 `
