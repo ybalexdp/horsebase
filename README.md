@@ -10,12 +10,26 @@ $ horsebase -build
 ```  
 
 # install
-Build by yourself.  
+##Build by yourself.  
 ```bash
 $ make install  
 ```  
+## Go Get
+Run the following command beforehand.
+```bash
+$ export PATH=$PATH:$GOPATH/bin
+```
 
-Other installation methods(ex. go get) will be supported in the future.  
+You can install by "go get".  
+```bash
+$ go get github.com/ybalexdp/horsebase  
+```
+
+and
+
+```bash
+$ cd $GOPATH/src/github.com/ybalexdp/horsebase  
+```
 
 # Configuration File
 `horsebase` provides a configuration file in toml format.
