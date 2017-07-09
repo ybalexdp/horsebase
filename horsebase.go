@@ -229,9 +229,7 @@ func (hb *Horsebase) destroy() error {
 		input := scanner.Text()
 
 		switch input {
-		case "y":
-			fallthrough
-		case "Y":
+		case "y", "Y":
 			hb.DbInfo = hb.DbInfo.New()
 			defer hb.DbInfo.db.Close()
 
@@ -239,9 +237,7 @@ func (hb *Horsebase) destroy() error {
 				return err
 			}
 
-		case "n":
-			fallthrough
-		case "N":
+		case "n", "N":
 			return err
 		}
 	}
