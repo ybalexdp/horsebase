@@ -2,7 +2,6 @@ package main
 
 import "github.com/BurntSushi/toml"
 
-// BloodTypeToml :系統と種牡馬を定義したtomlファイルのデータ格納用
 type BloodTypeToml struct {
 	Btd BloodTypeDefine          `toml:"bloodtype"`
 	Mbt map[string]MainBloodType `toml:"mainbloodtypes"`
@@ -21,6 +20,7 @@ type SubBloodType struct {
 	Stallions []string `toml:"stallions"`
 }
 
+// New generates a BloodTypeToml object
 func (btt BloodTypeToml) New() BloodTypeToml {
 	_, err := toml.DecodeFile("./file/bloodtype.toml", &btt)
 	if err != nil {
@@ -30,6 +30,7 @@ func (btt BloodTypeToml) New() BloodTypeToml {
 	return btt
 }
 
+// RegistBloodType store blood-type information according to bloodtype.toml
 func (btd BloodTypeDefine) RegistBloodType(hbdb HBDB) error {
 	var err error
 	for _, btname := range btd.Bloodtypes {
@@ -42,6 +43,8 @@ func (btd BloodTypeDefine) RegistBloodType(hbdb HBDB) error {
 	return err
 }
 
+// matchBloodType map stallion data with mainbloodtype
+// according to the mainbloodtype defined in bloodtype.toml
 func (btt BloodTypeToml) matchBloodType(hbdb HBDB) error {
 	var err error
 
@@ -57,6 +60,8 @@ func (btt BloodTypeToml) matchBloodType(hbdb HBDB) error {
 	return err
 }
 
+// matchSubBloodType map stallion data with sugbloodtype
+// according to the subbloodtype defined in bloodtype.toml
 func (btt BloodTypeToml) matchSubBloodType(hbdb HBDB) error {
 	var err error
 
@@ -72,6 +77,8 @@ func (btt BloodTypeToml) matchSubBloodType(hbdb HBDB) error {
 	return err
 }
 
+// MatchBloodType map stallion data with bloodtype
+// according to the bloodtype defined in bloodtype.toml
 func (btt BloodTypeToml) MatchBloodType(hbdb HBDB) error {
 	var err error
 
