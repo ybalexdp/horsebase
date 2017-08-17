@@ -17,19 +17,18 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// RaceData :
-// レースデータの情報を持つ構造体
+// RaceData is race data object
 type RaceData struct {
-	RaceID     int           // netkeibaのレースID
-	Name       string        // レース名
-	Course     int           // 0:右回り 1:左回り 2:直線
-	Corner     int           // 0:内回り 2:外回り
-	Distance   int           // 距離
-	Date       time.Time     // 開催日
-	Grade      int           // 1:新馬 2:未勝利 3:500万下 4:1000万下 5:1600万下 6:OP 7:G 8:G3 9:G2 10:G1
-	Turf       string        // 競馬場
-	RaceNumber int           // 第何レースか
-	Day        int           // 第何日目開催か
+	RaceID     int           // Race ID
+	Name       string        // Race name
+	Course     int           // 0:Clockwise 1:Anti-Clockwise 2:Straight line
+	Corner     int           // 0:Inner line 2:Outer line
+	Distance   int           // Race distance
+	Date       time.Time     // Day at the race
+	Grade      int           // 1:Debut 2:Maidon 3:Under 500M 4:Under 1000M 5:Under 1600M 6:OPEN 7:G 8:G3 9:G2 10:G1
+	Turf       string        // Turf
+	RaceNumber int           // Race Number
+	Day        int           // Passed days
 	Surface    int           // 0:芝 1:ダート 2:障害
 	Weather    int           // 0:晴 1:雨 2:雪 3:曇 4:小雨
 	TrackCond  int           // 0:良 1:稍重 2:重 3:不良
@@ -46,7 +45,7 @@ type RaceData struct {
 	Laps       []float64     // 1Fごとのタイム
 }
 
-// Horse :馬データ
+// Horse is horse's
 type Horse struct {
 	HorseID    int    // netkeibaの馬ID
 	Name       string //馬名
@@ -244,6 +243,9 @@ func (hb *Horsebase) GetRaceHTML() error {
 
 		if len(line) > 2 {
 			raceID := getRaceIDfromHTML((string)(line))
+			if (raceID == "200808020398") || (raceID == "200808020399") {
+				continue
+			}
 
 			//ファイル未取得の場合
 			if !hb.raceExistenceCheck(raceID) {
@@ -265,6 +267,7 @@ func (hb *Horsebase) MakeRaceURLList() error {
 	if err != nil {
 		return err
 	}
+
 	defer fp.Close()
 
 	writer := bufio.NewWriter(fp)
@@ -310,7 +313,11 @@ func (hb *Horsebase) RegistHorseData() error {
 		return err
 	}
 
-	hb.DbInfo = hb.DbInfo.New()
+	hb.DbInfo, err = hb.DbInfo.New()
+	if err != nil {
+		PrintError(hb.Stderr, "%s", err)
+		return err
+	}
 	defer hb.DbInfo.db.Close()
 
 	for _, file := range files {
@@ -385,7 +392,6 @@ func (hb *Horsebase) RegistHorseData() error {
 func (hb *Horsebase) RegistRaceData() error {
 
 	var data []string
-	var racedata RaceData
 	var horse Horse
 	var result RaceResultData
 	var ftime time.Time
@@ -396,13 +402,22 @@ func (hb *Horsebase) RegistRaceData() error {
 		return err
 	}
 
-	hb.DbInfo = hb.DbInfo.New()
-	defer hb.DbInfo.db.Close()
-
 	for _, file := range files {
+
+		var racedata RaceData
+
+		hb.DbInfo, err = hb.DbInfo.New()
+		if err != nil {
+			PrintError(hb.Stderr, "%s", err)
+			return err
+		}
+		defer hb.DbInfo.db.Close()
 
 		//レースID取得
 		raceID := strings.Split(file.Name(), ".")[0]
+		if len(raceID) != 12 {
+			continue
+		}
 		racedata.RaceID, _ = strconv.Atoi(raceID)
 
 		// 既に登録済みのレースデータであれば解析しない
@@ -412,6 +427,7 @@ func (hb *Horsebase) RegistRaceData() error {
 		}
 
 		if raceCheck {
+			hb.DbInfo.db.Close()
 			continue
 		}
 
@@ -508,8 +524,14 @@ func (hb *Horsebase) RegistRaceData() error {
 			// 着順
 			result.Rank, err = strconv.Atoi(s.Text())
 			if err != nil {
-				// 除外や中止の場合はエラー終了させない
-				break
+
+				// 降着の場合は着順を抜き取って続ける
+				if strings.Contains(s.Text(), "降") {
+					result.Rank, _ = strconv.Atoi(strings.Split(s.Text(), "(")[0])
+				} else {
+					// 除外や中止の場合はエラー終了させない
+					break
+				}
 			}
 			racedata.Horsenum++
 
@@ -545,8 +567,7 @@ func (hb *Horsebase) RegistRaceData() error {
 
 				// getHorseData内でHTTP GETするため
 				// インターバルをおく
-				time.Sleep(10 * time.Millisecond)
-
+				time.Sleep(3000 * time.Millisecond)
 				err = hb.getHorseData(horse.HorseID)
 				if err != nil {
 					return err
@@ -609,6 +630,11 @@ func (hb *Horsebase) RegistRaceData() error {
 			s = s.Next().Next().Next().Next()
 			result.Belonging = convBelonging(s.Text()[2:5])
 
+			err = hb.DbInfo.InsertRaceresult(result)
+			if err != nil {
+				return err
+			}
+
 			s = s.Parent().Next().Children().First()
 
 			attr, _ = s.Attr("class")
@@ -658,65 +684,71 @@ func (hb *Horsebase) RegistRaceData() error {
 
 		// ワイド馬番
 		s = doc.Find("th.wide").First().Next()
-		racedata.QP.HorseNum = getHorseNum(s.Text(), "-")
+		if strings.Contains(s.Text(), "-") {
+			racedata.QP.HorseNum = getHorseNum(s.Text(), "-")
 
-		// ワイド配当金
-		s = s.Next()
-		racedata.QP.Dividend = getDividendInfo(s.Text())
+			// ワイド配当金
+			s = s.Next()
+			racedata.QP.Dividend = getDividendInfo(s.Text())
 
-		// ワイド人気
-		s = s.Next()
-		racedata.QP.Popularity = getDividendInfo(s.Text())
+			// ワイド人気
+			s = s.Next()
+			racedata.QP.Popularity = getDividendInfo(s.Text())
+		}
 
 		// 馬単馬番
 		s = doc.Find("th.utan").First().Next()
-		racedata.Exacta.HorseNum = getHorseNum(s.Text(), "→")
+		if strings.Contains(s.Text(), "→") {
+			racedata.Exacta.HorseNum = getHorseNum(s.Text(), "→")
 
-		// 馬単配当金
-		s = s.Next()
-		racedata.Exacta.Dividend = getDividendInfo(s.Text())
+			// 馬単配当金
+			s = s.Next()
+			racedata.Exacta.Dividend = getDividendInfo(s.Text())
 
-		// 馬単人気
-		s = s.Next()
-		racedata.Exacta.Popularity = getDividendInfo(s.Text())
+			// 馬単人気
+			s = s.Next()
+			racedata.Exacta.Popularity = getDividendInfo(s.Text())
+		}
 
 		// 三連複馬番
 		s = doc.Find("th.sanfuku").First().Next()
-		racedata.Trio.HorseNum = getHorseNum(s.Text(), "-")
+		if strings.Contains(s.Text(), "-") {
+			racedata.Trio.HorseNum = getHorseNum(s.Text(), "-")
 
-		// 三連複配当金
-		s = s.Next()
-		racedata.Trio.Dividend = getDividendInfo(s.Text())
+			// 三連複配当金
+			s = s.Next()
+			racedata.Trio.Dividend = getDividendInfo(s.Text())
 
-		// 三連複人気
-		s = s.Next()
-		racedata.Trio.Popularity = getDividendInfo(s.Text())
+			// 三連複人気
+			s = s.Next()
+			racedata.Trio.Popularity = getDividendInfo(s.Text())
+		}
 
 		// 三連単馬番
 		s = doc.Find("th.santan").First().Next()
-		racedata.Trifecta.HorseNum = getHorseNum(s.Text(), "→")
 
-		// 三連単配当金
-		s = s.Next()
-		racedata.Trifecta.Dividend = getDividendInfo(s.Text())
+		if strings.Contains(s.Text(), "→") {
+			racedata.Trifecta.HorseNum = getHorseNum(s.Text(), "→")
+			// 三連単配当金
+			s = s.Next()
+			racedata.Trifecta.Dividend = getDividendInfo(s.Text())
 
-		// 三連単人気
-		s = s.Next()
-		racedata.Trifecta.Popularity = getDividendInfo(s.Text())
+			// 三連単人気
+			s = s.Next()
+			racedata.Trifecta.Popularity = getDividendInfo(s.Text())
+		}
 
 		s = doc.Find("td.race_lap_cell").First()
 		racedata.Laps = getLaps(s.Text())
-
-		err = hb.DbInfo.InsertRaceresult(result)
-		if err != nil {
-			return err
-		}
 
 		hb.registDividendInfo(racedata)
 		err = hb.DbInfo.tx.Commit()
 		if err != nil {
 			return err
 		}
+		hb.DbInfo.db.Close()
+		fp.Close()
+
 	}
 
 	return err
@@ -954,6 +986,7 @@ func getHTML(url string, id string, htmlPath string) error {
 
 	fp, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
+		fmt.Println("OpenFile error")
 		return err
 	}
 	defer fp.Close()
@@ -968,6 +1001,7 @@ func getHTML(url string, id string, htmlPath string) error {
 	html = strings.Replace(html, "<br />", "/", -1)
 	_, err = writer.WriteString(html)
 	if err != nil {
+		fmt.Println("WriteString error")
 		return err
 	}
 	writer.Flush()
@@ -1110,7 +1144,7 @@ func getResBody(url string) (string, error) {
 		return html, err
 	}
 	defer res.Body.Close()
-	//body, err := ioutil.ReadAll(res.Body)
+
 	utfbody := transform.NewReader(bufio.NewReader(res.Body), japanese.EUCJP.NewDecoder())
 	body, err := ioutil.ReadAll(utfbody)
 	if err != nil {

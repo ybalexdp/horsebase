@@ -9,35 +9,37 @@ import (
 	//"fmt"
 )
 
-func (hbdb HBDB) New() HBDB {
+func (hbdb HBDB) New() (HBDB, error) {
 	_, err := toml.DecodeFile("./file/horsebase.toml", &hbdb)
 	if err != nil {
-		panic(err)
+		return hbdb, err
 	}
 	hbdb.db, err = sql.Open("mysql", hbdb.DbUser+":"+hbdb.DbPass+"@/horsebase")
 	if err != nil {
-		panic(err)
+		return hbdb, fmt.Errorf("Check the status of mysql service and dbuser/dbpass in horsebase.toml")
 	}
-
-	return hbdb
+	return hbdb, err
 }
 
 func (hbdb HBDB) InitDB() error {
 	db, err := sql.Open("mysql", hbdb.DbUser+":"+hbdb.DbPass+"@/")
 	if err != nil {
-		return err
+		return fmt.Errorf("Check the status of mysql service and dbuser/dbpass in horsebase.toml")
 	}
-	createDB(db)
+	err = createDB(db)
+	if err != nil {
+		return fmt.Errorf("Check the status of mysql service and dbuser/dbpass in horsebase.toml")
+	}
 
 	db, err = sql.Open("mysql", hbdb.DbUser+":"+hbdb.DbPass+"@/horsebase")
 	if err != nil {
-		return err
+		return fmt.Errorf("Check the status of mysql service and dbuser/dbpass in horsebase.toml")
 	}
 
 	err = createTable(db)
 	if err != nil {
 		hbdb.DropDB()
-		return err
+		return fmt.Errorf("Check the status of mysql service and dbuser/dbpass in horsebase.toml")
 	}
 
 	err = createIDX(db)
@@ -53,7 +55,6 @@ func (hbdb HBDB) InitDB() error {
 }
 
 func (hbdb HBDB) DropDB() error {
-
 	query := "DROP DATABASE	horsebase"
 	_, err := hbdb.db.Exec(query)
 	return err

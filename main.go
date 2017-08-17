@@ -2,8 +2,6 @@ package main
 
 import "os"
 
-var version string
-
 func main() {
 	hb := &Horsebase{}
 	hb = hb.New()

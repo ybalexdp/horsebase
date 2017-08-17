@@ -10,7 +10,20 @@ $ horsebase -build
 ```  
 
 # install
-##Build by yourself.  
+
+## Binary released
+You can download the binary from [release page](https://github.com/ybalexdp/horsebase/releases).
+
+## Homebrew
+```bash
+$ brew tap ybalexdp/horsebase
+```
+
+```bash
+$ brew install horsebase
+```
+
+## Build by yourself.  
 ```bash
 $ make install  
 ```  
@@ -106,12 +119,12 @@ You can define main blood-type and sub blood-type and you can map stallions to i
 
 # Command Line Options
 ```bash
---build,-b            # Stores all data  
+--build,-b            # Store all data  
 
 --init_db,-i          # Create horsebase DB  
 --reg_bloodtype       # Store the bloodtype data defined in bloodtype.toml in horsebase DB  
 --list,-l             # Save the URL of the race data in racelist.txt  
---get_racehtml        # Gets the HTML form the URL listed in racelist.txt  
+--get_racehtml        # Get the HTML form the URL listed in racelist.txt  
 --reg_racedata        # Scrape HTML and store race data in horsebase DB  
 --reg_horsedata       # Scrape HTML and store horse data in horsebase DB  
 --drop_db,-d          # Delete horsebase DB  

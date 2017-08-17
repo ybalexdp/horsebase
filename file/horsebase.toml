@@ -1,7 +1,7 @@
 [config]
 race_html_path = "./html/race/"
 horse_html_path = "./html/horse/"
-oldest_date = 20170501  #いつのデータから取得するか
+oldest_date = 20070101  #いつのデータから取得するか
 
 [db]
 dbuser = "root"

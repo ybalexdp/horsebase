@@ -16,8 +16,6 @@ const (
 	tlayout = "04:05.0"
 )
 
-// Horsebase :
-// horsebase.tomlの[horsebase]のパラメータ値を保持した構造体
 type Horsebase struct {
 	Config Config `toml:"config"`
 	DbInfo HBDB   `toml:"db"`
@@ -25,16 +23,12 @@ type Horsebase struct {
 	Stderr io.Writer
 }
 
-// Config :
-// horsebase.tomlで定義した設定値を保持した構造体
 type Config struct {
 	RaceHtmlPath  string `toml:"race_html_path"`
 	HorseHtmlPath string `toml:"horse_html_path"`
 	OldestDate    int    `toml:"oldest_date"`
 }
 
-// HBDB :
-// DBアクセス用構造体
 type HBDB struct {
 	DbUser string `toml:"dbuser"`
 	DbPass string `toml:"dbpass"`
@@ -42,8 +36,7 @@ type HBDB struct {
 	tx     *sql.Tx
 }
 
-// New :
-// Horsebaseオブジェクト生成
+// New generates a horsebase object
 func (hb *Horsebase) New() *Horsebase {
 
 	hb = &Horsebase{
@@ -60,7 +53,9 @@ func (hb *Horsebase) New() *Horsebase {
 	return hb
 }
 
+// Run executes process according to specified option
 func (hb *Horsebase) Run(args []string) int {
+	var err error
 
 	if len(args) != 2 {
 		PrintError(hb.Stderr, "Invalid Argument")
@@ -78,8 +73,6 @@ func (hb *Horsebase) Run(args []string) int {
 		match    bool
 		build    bool
 	)
-
-	//f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
 	flag.Usage = func() {
 		fmt.Println(help)
@@ -109,19 +102,27 @@ func (hb *Horsebase) Run(args []string) int {
 
 	flag.Parse()
 
+	// Create horsebase DB
 	if initdb {
-		// DB構築
-		// 初回起動
-		hb.DbInfo = hb.DbInfo.New()
+		hb.DbInfo, err = hb.DbInfo.New()
+		if err != nil {
+			PrintError(hb.Stderr, "%s", err)
+			return 1
+		}
 		defer hb.DbInfo.db.Close()
 
 		if err := hb.DbInfo.InitDB(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
+		// Store the bloodtype data defined in bloodtype.toml in horsebase DB
 	} else if regblood {
-		// 血統データ登録
-		hb.DbInfo = hb.DbInfo.New()
+		hb.DbInfo, err = hb.DbInfo.New()
+		if err != nil {
+			PrintError(hb.Stderr, "%s", err)
+			return 1
+		}
 		defer hb.DbInfo.db.Close()
 
 		var btt BloodTypeToml
@@ -131,36 +132,51 @@ func (hb *Horsebase) Run(args []string) int {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
+		// Save the URL of the race data in racelist.txt
 	} else if list {
-		// レースデータのURLを取得しracelist.txtに保存する
 		if err := hb.MakeRaceURLList(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
+		// Get the HTML form the URL listed in racelist.txt
 	} else if gethtml {
 
 		if err := hb.GetRaceHTML(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
+		// Scrape HTML and store race data in horsebase DB
 	} else if regrace {
 		if err := hb.RegistRaceData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
+		// Scrape HTML and store horse data in horsebase DB
 	} else if reghorse {
 
 		if err := hb.RegistHorseData(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
+		// Delete horsebase DB
 	} else if dropdb {
 		if err := hb.destroy(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+
+		// Map bloodtype data and stallion data defined in bloodtype.toml
 	} else if match {
-		hb.DbInfo = hb.DbInfo.New()
+		hb.DbInfo, err = hb.DbInfo.New()
+		if err != nil {
+			PrintError(hb.Stderr, "%s", err)
+			return 1
+		}
 		defer hb.DbInfo.db.Close()
 
 		var btt BloodTypeToml
@@ -171,6 +187,7 @@ func (hb *Horsebase) Run(args []string) int {
 			return 1
 		}
 
+		// Store all data
 	} else if build {
 		if err := hb.build(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
@@ -184,10 +201,17 @@ func (hb *Horsebase) Run(args []string) int {
 	return 0
 }
 
+// build store all data
 func (hb *Horsebase) build() error {
 	var err error
-	hb.DbInfo = hb.DbInfo.New()
-	defer hb.DbInfo.db.Close()
+	/*
+		hb.DbInfo, err = hb.DbInfo.New()
+		if err != nil {
+			PrintError(hb.Stderr, "%s", err)
+			return err
+		}
+		defer hb.DbInfo.db.Close()
+	*/
 
 	if err = hb.DbInfo.InitDB(); err != nil {
 		return err
@@ -201,7 +225,7 @@ func (hb *Horsebase) build() error {
 		return err
 	}
 
-	if err = hb.RegistHorseData(); err != nil {
+	if err = hb.RegistRaceData(); err != nil {
 		return err
 	}
 
@@ -219,6 +243,7 @@ func (hb *Horsebase) build() error {
 	return err
 }
 
+// destroy delete horsebase DB
 func (hb *Horsebase) destroy() error {
 	var err error
 
@@ -230,16 +255,25 @@ func (hb *Horsebase) destroy() error {
 
 		switch input {
 		case "y", "Y":
-			hb.DbInfo = hb.DbInfo.New()
+			hb.DbInfo, err = hb.DbInfo.New()
+			if err != nil {
+				PrintError(hb.Stderr, "%s", err)
+				return err
+			}
 			defer hb.DbInfo.db.Close()
 
 			if err = hb.DbInfo.DropDB(); err != nil {
 				return err
 			}
+			break
 
 		case "n", "N":
 			return err
+
+		default:
+			return err
 		}
+
 	}
 	return err
 }

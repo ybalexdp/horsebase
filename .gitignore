@@ -1,4 +1,7 @@
 html/
 pkg/
+vendor/
 horsebase
 file/racelist.txt
+glide.lock
+horsebase_*
