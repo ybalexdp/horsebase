@@ -16,8 +16,11 @@ func Test_GetRaceHTML(t *testing.T) {
 
 	err := hb.GetRaceHTML()
 	if err != nil {
-		t.Fatalf("GetRaceHTML error:%s", err)
+		t.Fatalf("MakeRaceURLList error:%s", err)
 	}
+
+	if err != nil {
+		t.Fatalf("GetRaceHTML error:%s", err)
 }
 */
 
@@ -352,6 +355,40 @@ func Test_convSurface(t *testing.T) {
 	surface = convSurface("他")
 	if surface != -1 {
 		t.Fatalf("convSurface error:%d", surface)
+	}
+
+}
+
+func Test_convWeather(t *testing.T) {
+
+	weather := convWeather("晴")
+	if weather != Sunny {
+		t.Fatalf("convWeather error:%d", weather)
+	}
+
+	weather = convWeather("雨")
+	if weather != Rainy {
+		t.Fatalf("convWeather error:%d", weather)
+	}
+
+	weather = convWeather("雪")
+	if weather != Snowy {
+		t.Fatalf("convWeather error:%d", weather)
+	}
+
+	weather = convWeather("曇")
+	if weather != Cloudy {
+		t.Fatalf("convWeather error:%d", weather)
+	}
+
+	weather = convWeather("小雨")
+	if weather != Drizzle {
+		t.Fatalf("convWeather error:%d", weather)
+	}
+
+	weather = convWeather("他")
+	if weather != -1 {
+		t.Fatalf("convWeather error:%d", weather)
 	}
 
 }

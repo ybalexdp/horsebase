@@ -231,6 +231,29 @@ func (hb *Horsebase) GetRaceHTML() error {
 	}
 	defer fpr.Close()
 
+	// ./htmlフォルダ有無確認
+	_, err = os.Stat("./html")
+	if err != nil {
+		if err := os.Mkdir("./html", 0777); err != nil {
+			return err
+		}
+	}
+
+	// ./html/raceフォルダ有無確認
+	_, err = os.Stat(hb.Config.RaceHtmlPath)
+	if err != nil {
+		if err := os.Mkdir(hb.Config.RaceHtmlPath, 0777); err != nil {
+			return err
+		}
+	}
+
+	_, err = os.Stat(hb.Config.HorseHtmlPath)
+	if err != nil {
+		if err := os.Mkdir(hb.Config.HorseHtmlPath, 0777); err != nil {
+			return err
+		}
+	}
+
 	reader := bufio.NewReader(fpr)
 
 	for {
@@ -243,6 +266,7 @@ func (hb *Horsebase) GetRaceHTML() error {
 
 		if len(line) > 2 {
 			raceID := getRaceIDfromHTML((string)(line))
+			// 下記2つはnetkeibaのバグ
 			if (raceID == "200808020398") || (raceID == "200808020399") {
 				continue
 			}
@@ -303,11 +327,13 @@ func (hb *Horsebase) MakeRaceURLList() error {
 
 }
 
+// 競走馬データを登録する
 func (hb *Horsebase) RegistHorseData() error {
 
 	var horse Horse
 	var stallion [4]Stallion
 
+	// 取得済みのHTML読み込み
 	files, err := ioutil.ReadDir(hb.Config.HorseHtmlPath)
 	if err != nil {
 		return err
@@ -406,6 +432,8 @@ func (hb *Horsebase) RegistRaceData() error {
 
 		var racedata RaceData
 
+		fmt.Println(file)
+
 		hb.DbInfo, err = hb.DbInfo.New()
 		if err != nil {
 			PrintError(hb.Stderr, "%s", err)
@@ -416,6 +444,7 @@ func (hb *Horsebase) RegistRaceData() error {
 		//レースID取得
 		raceID := strings.Split(file.Name(), ".")[0]
 		if len(raceID) != 12 {
+			hb.DbInfo.db.Close()
 			continue
 		}
 		racedata.RaceID, _ = strconv.Atoi(raceID)
@@ -754,6 +783,7 @@ func (hb *Horsebase) RegistRaceData() error {
 	return err
 }
 
+// 1着馬との着差を算出する
 func calcDifTime(result RaceResultData, ftime time.Time) float64 {
 	var diftime float64
 
@@ -986,7 +1016,6 @@ func getHTML(url string, id string, htmlPath string) error {
 
 	fp, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
-		fmt.Println("OpenFile error")
 		return err
 	}
 	defer fp.Close()
@@ -1001,7 +1030,6 @@ func getHTML(url string, id string, htmlPath string) error {
 	html = strings.Replace(html, "<br />", "/", -1)
 	_, err = writer.WriteString(html)
 	if err != nil {
-		fmt.Println("WriteString error")
 		return err
 	}
 	writer.Flush()

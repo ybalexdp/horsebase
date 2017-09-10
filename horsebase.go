@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	layout  = "2006-01-02"
-	tlayout = "04:05.0"
+	layout = "2006-01-02" // for Date Format
+	//tlayout = "04:05.0"
 )
 
 type Horsebase struct {
@@ -204,14 +204,6 @@ func (hb *Horsebase) Run(args []string) int {
 // build store all data
 func (hb *Horsebase) build() error {
 	var err error
-	/*
-		hb.DbInfo, err = hb.DbInfo.New()
-		if err != nil {
-			PrintError(hb.Stderr, "%s", err)
-			return err
-		}
-		defer hb.DbInfo.db.Close()
-	*/
 
 	if err = hb.DbInfo.InitDB(); err != nil {
 		return err
@@ -226,7 +218,8 @@ func (hb *Horsebase) build() error {
 	}
 
 	if err = hb.RegistRaceData(); err != nil {
-		return err
+		PrintError(hb.Stderr, "%s", err)
+		return fmt.Errorf("Please retry \n $ horsebase --reg_racedata")
 	}
 
 	if err = hb.RegistHorseData(); err != nil {
@@ -247,7 +240,7 @@ func (hb *Horsebase) build() error {
 func (hb *Horsebase) destroy() error {
 	var err error
 
-	fmt.Println("All data will be deleted, is it OK?[y/n] ")
+	fmt.Print("All data will be deleted, is it OK?[y/n] ")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {

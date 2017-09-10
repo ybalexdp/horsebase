@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
@@ -106,9 +107,12 @@ func (hbdb HBDB) UpdateHorseNum(rd RaceData) error {
 
 func (hbdb HBDB) InsertRaceresult(rrd RaceResultData) error {
 
+	stime := rrd.Time.String()
+	stime = strings.Split(stime, "+")[0]
+
 	query := "INSERT INTO raceresult VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	_, err := hbdb.tx.Exec(query, rrd.RaceID, rrd.HorseID, rrd.Rank, rrd.JockeyID, rrd.Popularity, rrd.Odds, rrd.Age,
-		rrd.Weight, rrd.Bweight, rrd.Hnumber, rrd.Wnumber, rrd.LastThreeFur, rrd.Sex, rrd.Time, rrd.DifTime,
+		rrd.Weight, rrd.Bweight, rrd.Hnumber, rrd.Wnumber, rrd.LastThreeFur, rrd.Sex, stime, rrd.DifTime,
 		rrd.POrder[0], rrd.POrder[1], rrd.POrder[2], rrd.POrder[3], rrd.Belonging)
 
 	return err
@@ -261,7 +265,7 @@ horse_num INT,
 waku_num INT,
 last3f DOUBLE(3,1),
 sex INT,
-time TIME,
+time TIME(1),
 diftime DOUBLE(3,1),
 passing_order1 INT,
 passing_order2 INT,

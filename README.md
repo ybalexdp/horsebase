@@ -6,7 +6,7 @@ horsebase
 # Usage
 `horsebase` stores the horse racing data in the database by executing the following command.  
 ```bash
-$ horsebase -build
+$ horsebase -b
 ```  
 
 # install

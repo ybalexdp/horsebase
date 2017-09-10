@@ -4,14 +4,20 @@ bloodtypes = [
   'エーピーインディ系',
   'キングマンボ系',
   'グレイソヴリン系',
+  'サドラーズウェルズ系',
   'サンデーサイレンス系',
   'ストックウエル系',
+  'セントサイモン系',
   'ターントゥ系',
   'ダマスカス系',
+  'ダンチヒ系',
   'ディープインパクト系',
   'ナスルーラ系',
+  'ニアークティック系',
   'ノーザンダンサー系',
+  'ハイペリオン系',
   'ハビタット系',
+  'ハンプトン系',
   'ファイントップ系',
   'フェアウエイ系',
   'フォーティナイナー系',
@@ -28,9 +34,6 @@ bloodtypes = [
   'Lサンデー系',
   'Dサンデー系',
   'Tサンデー系',
-  'ダンチヒ系',
-  'サドラーズウェルズ系',
-  'セントサイモン系',
   'リファール系',
   'ネイティヴダンサー系',
   'エクリプス系',
@@ -56,11 +59,15 @@ bloodtypes = [
     'アンライバルド',
     'ヴィクトワールピサ',
     'オレハマッテルゼ',
+    'オンファイア',
     'カネヒキリ',
     'キンシャサノキセキ',
     'ゴールドアリュール',
+    'サムライハート',
     'シルクフェイマス',
+    'ステイゴールド',
     'スペシャルウィーク',
+    'ゼンノロブロイ',
     'ダイワメジャー',
     'ダンスインザダーク',
     'ディープインパクト',
@@ -72,8 +79,8 @@ bloodtypes = [
     'フジキセキ',
     'ブラックタイド',
     'マーベラスサンデー',
+    'マツリダゴッホ',
     'マンハッタンカフェ',
-    'ステイゴールド',
     'サンデーサイレンス'
   ]
 
@@ -89,6 +96,7 @@ bloodtypes = [
     'Graustark',
     'Le Fabuleux',
     'Pleasant Colony',
+    'Plugged Nickle',
     'Siphon',
     'Speak John',
     'Stalwart'
@@ -102,6 +110,7 @@ bloodtypes = [
 
   [mainbloodtypes.'ダマスカス系']
   stallions = [
+    'オジジアン',
     'Cutlass'
   ]
 
@@ -118,9 +127,15 @@ bloodtypes = [
     'バゴ',
     'ビワハヤヒデ',
     'ミルジョージ',
+    'リードワンダー',
+    'リヴリア',
+    'Ahmad',
     'Artichoke',
     'Avenue of Flags',
+    'Bel Bolide',
+    'Big Shuffle',
     'Blushing Groom',
+    'Candy Stripes',
     'Capote',
     'Cozzene',
     'Dashing Blade',
@@ -134,10 +149,17 @@ bloodtypes = [
     'Rahy',
     'Rainbow Quest',
     'Risen Star',
+    'Riverman',
     'Runaway Groom',
     'Seattle Slew',
     'Slewpy',
-    'Tsunami Slew'
+    'Tsunami Slew',
+    'With Approval'
+  ]
+
+  [mainbloodtypes.'ニアークティック系']
+  stallions = [
+    'ワイルドラッシュ',
   ]
 
   [mainbloodtypes.'ネイティヴダンサー系']
@@ -148,6 +170,7 @@ bloodtypes = [
     'Bering',
     'Diesis',
     'Kris',
+    'Laomedonte',
     'Majestic Light'
   ]
 
@@ -155,10 +178,15 @@ bloodtypes = [
   stallions = [
     'アスワン',
     'ヴァイスリーガル',
+    'エリシオ',
+    'オペラハウス',
     'クロフネ',
     'ゴスホークケン',
     'コマンズ',
+    'コマンダーインチーフ',
+    'ジェネラス',
     'ジャイアンツコーズウェイ',
+    'シャーディー',
     'シングスピール',
     'スニッツェル',
     'タヤスレミグラン',
@@ -166,15 +194,20 @@ bloodtypes = [
     'チーフベアハート',
     'デインヒル',
     'ノーザンテースト',
+    'ノーザンディクテイター',
     'ハービンジャー',
     'パントレセレブル',
     'ファルブラヴ',
+    'フサイチコンコルド',
+    'フサイチリシャール',
     'フランケル',
     'フレンチデピュティ',
     'ホワイトマズル',
+    'ポリッシュネイビー',
     'マルゼンスキー',
     'メイショウサムソン',
     'ヨハネスブルグ',
+    'ラグビーボール',
     'ラムタラ',
     'レインボーアンバー',
     'ローエングリン',
@@ -190,6 +223,7 @@ bloodtypes = [
     'Desert Prince',
     'Exchange Rate',
     'Fabulous Dancer',
+    'Fairy King',
     'Frankel',
     'Ghostzapper',
     "Giant's Causeway",
@@ -207,6 +241,12 @@ bloodtypes = [
     'Storm Boot',
     'Storm Cat',
     'Summer Squall'
+  ]
+
+  [mainbloodtypes.'ハンプトン系']
+  stallions = [
+    'ミシシッピアン',
+    'Precocious'
   ]
 
   [mainbloodtypes.'ファイントップ系']
@@ -234,6 +274,7 @@ bloodtypes = [
   [mainbloodtypes.'マッチェム系']
   stallions = [
     'ウォーニング',
+    'Honour and Glory',
     'Tiznow'
   ]
 
@@ -251,11 +292,13 @@ bloodtypes = [
     'スウェプトオーヴァーボード',
     'ティンバーカントリー',
     'フォーティナイナー',
+    'マイニング',
     'マイネルラヴ',
     'Belgravia',
     'Crafty Prospector',
     'Dubai Millennium',
     'Fappiano',
+    'Gold Alert',
     'Gone West',
     'Grand Slam',
     'Gulch',
@@ -284,6 +327,7 @@ bloodtypes = [
     'シンボリクリスエス',
     'スクリーンヒーロー',
     'タニノギムレット',
+    'ナリタブライアン',
     'ブライアンズタイム',
     'リアルシャダイ',
     'Dynaformer',
@@ -296,6 +340,7 @@ bloodtypes = [
   [subbloodtypes.'ヴァイスリージェント系']
   stallions = [
     'クロフネ',
+    'フサイチリシャール',
     'フレンチデピュティ',
     'Deputy Minister',
     'Ghostzapper',
@@ -324,11 +369,14 @@ bloodtypes = [
     'タマモクロス',
     'トニービン',
     'ビワハヤヒデ',
-    'Cozzene'
+    'リードワンダー',
+    'Cozzene',
+    'With Approval'
   ]
 
   [subbloodtypes.'サドラーズウェルズ系']
   stallions = [
+    'オペラハウス',
     'シングスピール',
     'フランケル',
     'メイショウサムソン',
@@ -379,16 +427,19 @@ bloodtypes = [
 
   [subbloodtypes.'ダマスカス系']
   stallions = [
+    'オジジアン',
     'Cutlass'
   ]
 
   [subbloodtypes.'ダンチヒ系']
   stallions = [
     'コマンズ',
+    'シャーディー',
     'スニッツェル',
     'チーフベアハート',
     'デインヒル',
     'ハービンジャー',
+    'ポリッシュネイビー',
     'ロックオブジブラルタル',
     'Belong to Me',
     'Cape Cross',
@@ -409,12 +460,20 @@ bloodtypes = [
 
   [subbloodtypes.'ナスルーラ系']
   stallions = [
+    'Ahmad',
     'Lt. Stevens',
     'Potrillazo'
   ]
 
+  [subbloodtypes.'ニアークティック系']
+  stallions = [
+    'ワイルドラッシュ',
+  ]
+
   [subbloodtypes.'ニジンスキー系']
   stallions = [
+    'ジェネラス',
+    'フサイチコンコルド',
     'マルゼンスキー',
     'ラムタラ',
     'Caerleon',
@@ -438,23 +497,30 @@ bloodtypes = [
     'Bering',
     'Diesis',
     'Kris',
+    'Laomedonte',
     'Majestic Light'
   ]
 
   [subbloodtypes.'ネヴァーベンド系']
   stallions = [
     'ミルジョージ',
+    'リヴリア',
     'Dashing Blade',
     'Garde Royale',
-    'Loup Sauvage'
+    'Loup Sauvage',
+    'Riverman'
   ]
 
   [subbloodtypes.'ノーザンダンサー系']
   stallions = [
     'ヴァイスリーガル',
+    'エリシオ',
     'タヤスレミグラン',
+    'ノーザンディクテイター',
     'ファルブラヴ',
+    'ラグビーボール',
     'Fabulous Dancer',
+    'Fairy King',
     'Marju'
   ]
 
@@ -463,6 +529,12 @@ bloodtypes = [
     'アスワン',
     'ノーザンテースト',
     'レインボーアンバー'
+  ]
+
+  [subbloodtypes.'ハイペリオン系']
+  stallions = [
+    'ミシシッピアン',
+    'Precocious'
   ]
 
   [subbloodtypes.'ハビタット系']
@@ -509,6 +581,8 @@ bloodtypes = [
     'ジャッジアンジェルーチ',
     'Artichoke',
     'Avenue of Flags',
+    'Bel Bolide',
+    'Big Shuffle',
     'Capote',
     'General Meeting',
     'Risen Star',
@@ -525,6 +599,7 @@ bloodtypes = [
   [subbloodtypes.'マッチェム系']
   stallions = [
     'ウォーニング',
+    'Honour and Glory',
     'Tiznow'
   ]
 
@@ -533,11 +608,13 @@ bloodtypes = [
     'アグネスデジタル',
     'ジェイドロバリー',
     'ティンバーカントリー',
+    'マイニング',
     'マイネルラヴ',
     'Belgravia',
     'Crafty Prospector',
     'Dubai Millennium',
     'Fappiano',
+    'Gold Alert',
     'Gone West',
     'Grand Slam',
     'Gulch',
@@ -556,12 +633,22 @@ bloodtypes = [
     'Woodman'
   ]
 
+  [subbloodtypes.'リファール系']
+  stallions = [
+    'コマンダーインチーフ',
+    'ダンシングブレーヴ',
+    'ホワイトマズル',
+    'Alzao',
+    'Lyphard'
+  ]
+
   [subbloodtypes.'リボー系']
   stallions = [
     'タイトスポット',
     'Graustark',
     'Law Society',
     'Pleasant Colony',
+    'Plugged Nickle',
     'Stalwart'
   ]
 
@@ -569,6 +656,7 @@ bloodtypes = [
   stallions = [
     'バゴ',
     'Blushing Groom',
+    'Candy Stripes',
     'Rahy',
     'Rainbow Quest',
     'Runaway Groom'
@@ -576,14 +664,16 @@ bloodtypes = [
 
   [subbloodtypes.'Dサンデー系']
   stallions = [
+    'オンファイア',
+    'カネヒキリ',
     'ゴールドアリュール',
     'ネオユニヴァース',
-    'カネヒキリ'
   ]
 
   [subbloodtypes.'Lサンデー系']
   stallions = [
     'アドマイヤボス',
+    'サムライハート',
     'シルクフェイマス',
     'ディープスカイ',
     'ナカヤマフェスタ',
@@ -599,26 +689,19 @@ bloodtypes = [
     'オレハマッテルゼ',
     'キンシャサノキセキ',
     'ダイワメジャー',
-    'フジキセキ'
+    'フジキセキ',
+    'マツリダゴッホ'
   ]
 
   [subbloodtypes.'Tサンデー系']
   stallions = [
     'ステイゴールド',
     'スペシャルウィーク',
+    'ゼンノロブロイ',
     'ダンスインザダーク',
     'ハーツクライ',
     'マンハッタンカフェ'
   ]
-
-  [subbloodtypes.'リファール系']
-  stallions = [
-    'ダンシングブレーヴ',
-    'ホワイトマズル',
-    'Alzao',
-    'Lyphard'
-  ]
-
 
   [subbloodtypes.'ロベルト系']
   stallions = [
@@ -627,6 +710,7 @@ bloodtypes = [
     'シンボリクリスエス',
     'スクリーンヒーロー',
     'タニノギムレット',
+    'ナリタブライアン',
     'ブライアンズタイム',
     'リアルシャダイ',
     'Dynaformer',
