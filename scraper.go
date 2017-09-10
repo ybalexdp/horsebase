@@ -432,8 +432,6 @@ func (hb *Horsebase) RegistRaceData() error {
 
 		var racedata RaceData
 
-		fmt.Println(file)
-
 		hb.DbInfo, err = hb.DbInfo.New()
 		if err != nil {
 			PrintError(hb.Stderr, "%s", err)
