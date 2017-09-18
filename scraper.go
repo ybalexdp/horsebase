@@ -879,6 +879,9 @@ func convCourse(course string) int {
 }
 
 func convGrade(grade string) int {
+	if strings.Contains(grade, "J.") {
+		grade = strings.Split(grade, ".")[1]
+	}
 	switch grade {
 	case "新馬":
 		return GradeDebut
