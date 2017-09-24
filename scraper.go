@@ -1135,6 +1135,11 @@ func (hb *Horsebase) getRaceList(url string, racelist []string) ([]string, error
 func getRaceGrade(text string) (bool, int) {
 	gradecheck := strings.Split(text, "(")
 	if len(gradecheck) > 1 {
+		// 天皇賞(春) or (秋)の場合
+		if len(gradecheck) == 3 {
+			grade := convGrade(strings.Split(gradecheck[2], ")")[0])
+			return true, grade
+		}
 		grade := convGrade(strings.Split(gradecheck[1], ")")[0])
 		return true, grade
 	}
