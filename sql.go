@@ -644,6 +644,13 @@ func (hbdb HBDB) GetId(table string, name string) (int, error) {
 	return id, nil
 }
 
+func (hbdb HBDB) GetLatestDate() (string, error) {
+	var date string
+	query := "SELECT MAX(date) FROM racedata"
+	err := hbdb.db.QueryRow(query).Scan(&date)
+	return date, err
+}
+
 func (hbdb HBDB) RaceExistenceCheck(raceID string) (bool, error) {
 	query := "SELECT id FROM racedata WHERE id = " + raceID
 	return hbdb.rowExists(query)

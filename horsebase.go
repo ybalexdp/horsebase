@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -72,6 +74,7 @@ func (hb *Horsebase) Run(args []string) int {
 		dropdb   bool
 		match    bool
 		build    bool
+		update   bool
 	)
 
 	flag.Usage = func() {
@@ -99,6 +102,9 @@ func (hb *Horsebase) Run(args []string) int {
 
 	flag.BoolVar(&build, "build", false, "")
 	flag.BoolVar(&build, "b", false, "")
+
+	flag.BoolVar(&update, "update", false, "")
+	flag.BoolVar(&update, "u", false, "")
 
 	flag.Parse()
 
@@ -186,6 +192,11 @@ func (hb *Horsebase) Run(args []string) int {
 			PrintError(hb.Stderr, "%s", err)
 			return 1
 		}
+	} else if update {
+
+		if err := hb.update(); err != nil {
+			PrintError(hb.Stderr, "%s", err)
+		}
 
 		// Store all data
 	} else if build {
@@ -208,6 +219,47 @@ func (hb *Horsebase) build() error {
 	if err = hb.DbInfo.InitDB(); err != nil {
 		return err
 	}
+
+	if err = hb.MakeRaceURLList(); err != nil {
+		return err
+	}
+
+	if err = hb.GetRaceHTML(); err != nil {
+		return err
+	}
+
+	if err = hb.RegistRaceData(); err != nil {
+		PrintError(hb.Stderr, "%s", err)
+		return fmt.Errorf("Please retry \n $ horsebase --reg_racedata")
+	}
+
+	if err = hb.RegistHorseData(); err != nil {
+		return err
+	}
+
+	var btt BloodTypeToml
+	btt = btt.New()
+
+	if err = btt.MatchBloodType(hb.DbInfo); err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (hb *Horsebase) update() error {
+	var err error
+	hb.DbInfo, err = hb.DbInfo.New()
+	if err != nil {
+		return err
+	}
+
+	date, _ := hb.DbInfo.GetLatestDate()
+	defer hb.DbInfo.db.Close()
+
+	date = strings.Replace(date, "-", "", -1)
+	oldestdate, _ := strconv.Atoi(date)
+	hb.Config.OldestDate = oldestdate
 
 	if err = hb.MakeRaceURLList(); err != nil {
 		return err

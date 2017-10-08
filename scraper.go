@@ -287,7 +287,7 @@ func (hb *Horsebase) MakeRaceURLList() error {
 
 	file := "./file/racelist.txt"
 
-	fp, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	fp, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
@@ -296,7 +296,8 @@ func (hb *Horsebase) MakeRaceURLList() error {
 
 	writer := bufio.NewWriter(fp)
 
-	racelist, err = hb.getRaceList(baseURL+racetop, racelist)
+	// netkeiba.comからレースのURL一覧を取得
+	racelist, err = hb.getRaceList()
 	if err != nil {
 		return err
 	}
@@ -1104,7 +1105,26 @@ func getRaceIDfromHTML(url string) string {
 	return strings.Split(url, "/")[4]
 }
 
-func (hb *Horsebase) getRaceList(url string, racelist []string) ([]string, error) {
+func (hb *Horsebase) getRaceList() ([]string, error) {
+
+	var racelist []string
+	doc, err := goquery.NewDocument(baseURL + racetop)
+	if err != nil {
+		return nil, err
+	}
+
+	s := doc.Find("li.rev").First().Children().Next()
+	attr, _ := s.Attr("href")
+
+	racelist, err = hb.addRaceList(baseURL+attr, racelist)
+	if err != nil {
+		return nil, err
+	}
+
+	return racelist, nil
+}
+
+func (hb *Horsebase) addRaceList(url string, racelist []string) ([]string, error) {
 
 	doc, err := goquery.NewDocument(url)
 	if err != nil {
@@ -1113,17 +1133,17 @@ func (hb *Horsebase) getRaceList(url string, racelist []string) ([]string, error
 
 	s := doc.Find("li.rev").First().Children().Next()
 	attr, _ := s.Attr("href")
+
+	doc.Find("a").Each(func(_ int, s *goquery.Selection) {
+		listURL, _ := s.Attr("href")
+		if strings.Contains(listURL, "/race/list/") {
+			racelist = append(racelist, baseURL+listURL)
+		}
+		racelist = removeDuplicate(racelist)
+	})
+
 	if hb.checkOldestData(attr) {
-
-		doc.Find("a").Each(func(_ int, s *goquery.Selection) {
-			listURL, _ := s.Attr("href")
-			if strings.Contains(listURL, "/race/list/") {
-				racelist = append(racelist, baseURL+listURL)
-			}
-			racelist = removeDuplicate(racelist)
-		})
-
-		racelist, err = hb.getRaceList(baseURL+attr, racelist)
+		racelist, err = hb.addRaceList(baseURL+attr, racelist)
 		if err != nil {
 			return nil, err
 		}

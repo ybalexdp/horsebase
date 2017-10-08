@@ -1,6 +1,8 @@
 package main
 
-import "github.com/BurntSushi/toml"
+import (
+	"github.com/BurntSushi/toml"
+)
 
 type BloodTypeToml struct {
 	Btd BloodTypeDefine          `toml:"bloodtype"`
@@ -81,6 +83,12 @@ func (btt BloodTypeToml) matchSubBloodType(hbdb HBDB) error {
 // according to the bloodtype defined in bloodtype.toml
 func (btt BloodTypeToml) MatchBloodType(hbdb HBDB) error {
 	var err error
+
+	hbdb, err = hbdb.New()
+	if err != nil {
+		return err
+	}
+	defer hbdb.db.Close()
 
 	err = hbdb.DeleteBloodType()
 	if err != nil {
