@@ -197,6 +197,7 @@ func (hb *Horsebase) Run(args []string) int {
 		if err := hb.update(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 		}
+		return 1
 
 		// Store all data
 	} else if build {
@@ -204,6 +205,7 @@ func (hb *Horsebase) Run(args []string) int {
 			PrintError(hb.Stderr, "%s", err)
 		}
 		return 1
+
 	} else {
 		PrintError(hb.Stderr, "Invalid Argument")
 		return 1

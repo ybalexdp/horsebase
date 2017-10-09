@@ -8,6 +8,7 @@ import:
   version: v1.3
 - package: github.com/mitchellh/colorstring
 - package: golang.org/x/text
+- package: github.com/cheggaaa/pb
   subpackages:
   - encoding/japanese
   - transform

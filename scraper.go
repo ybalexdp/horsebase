@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/cheggaaa/pb"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 )
@@ -340,6 +340,9 @@ func (hb *Horsebase) RegistHorseData() error {
 		return err
 	}
 
+	count := len(files)
+	bar := pb.StartNew(count)
+
 	hb.DbInfo, err = hb.DbInfo.New()
 	if err != nil {
 		PrintError(hb.Stderr, "%s", err)
@@ -348,6 +351,8 @@ func (hb *Horsebase) RegistHorseData() error {
 	defer hb.DbInfo.db.Close()
 
 	for _, file := range files {
+		bar.Increment()
+
 		fp, err := os.Open(hb.Config.HorseHtmlPath + file.Name())
 		if err != nil {
 			return err
@@ -359,7 +364,19 @@ func (hb *Horsebase) RegistHorseData() error {
 			return err
 		}
 
-		horse.HorseID, _ = strconv.Atoi(strings.Split(file.Name(), ".")[0])
+		horseID := strings.Split(file.Name(), ".")[0]
+
+		horse.HorseID, _ = strconv.Atoi(horseID)
+
+		horseCheck, err := hb.DbInfo.HorseExistenceCheck(horseID)
+		if err != nil {
+			return err
+		}
+
+		if horseCheck {
+			fp.Close()
+			continue
+		}
 
 		s := doc.Find("h1").First()
 		horse.Name = strings.TrimSpace(s.Text())
@@ -413,6 +430,9 @@ func (hb *Horsebase) RegistHorseData() error {
 		fp.Close()
 
 	}
+
+	bar.FinishPrint("Registed Horse Data")
+
 	return err
 }
 
@@ -428,10 +448,13 @@ func (hb *Horsebase) RegistRaceData() error {
 	if err != nil {
 		return err
 	}
+	count := len(files)
+	bar := pb.StartNew(count)
 
 	for _, file := range files {
 
 		var racedata RaceData
+		bar.Increment()
 
 		hb.DbInfo, err = hb.DbInfo.New()
 		if err != nil {
@@ -470,7 +493,7 @@ func (hb *Horsebase) RegistRaceData() error {
 			return err
 		}
 
-		fmt.Println("Start:", racedata.RaceID)
+		//fmt.Println("Start:", racedata.RaceID)
 
 		//レース番号
 		s := doc.Find("dt").First()
@@ -778,6 +801,7 @@ func (hb *Horsebase) RegistRaceData() error {
 		fp.Close()
 
 	}
+	bar.FinishPrint("Registed Race Data")
 
 	return err
 }
