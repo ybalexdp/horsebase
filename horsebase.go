@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -23,6 +24,7 @@ type Horsebase struct {
 	DbInfo HBDB   `toml:"db"`
 	Stdout io.Writer
 	Stderr io.Writer
+	dir    string
 }
 
 type Config struct {
@@ -46,11 +48,16 @@ func (hb *Horsebase) New() *Horsebase {
 		Stderr: os.Stderr,
 	}
 
-	_, err := toml.DecodeFile("./file/horsebase.toml", &hb)
+	hb.dir = path.Dir(os.Args[0])
+
+	_, err := toml.DecodeFile(hb.dir+"/file/horsebase.toml", &hb)
 	if err != nil {
 		PrintError(hb.Stderr, "%s", err)
 		os.Exit(1)
 	}
+
+	hb.Config.HorseHtmlPath = hb.dir + hb.Config.HorseHtmlPath
+	hb.Config.RaceHtmlPath = hb.dir + hb.Config.RaceHtmlPath
 
 	return hb
 }

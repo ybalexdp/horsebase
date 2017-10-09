@@ -225,16 +225,16 @@ const (
 func (hb *Horsebase) GetRaceHTML() error {
 	var fpr *os.File
 
-	fpr, err := os.Open("./file/racelist.txt")
+	fpr, err := os.Open(hb.dir + "/file/racelist.txt")
 	if err != nil {
 		return err
 	}
 	defer fpr.Close()
 
 	// ./htmlフォルダ有無確認
-	_, err = os.Stat("./html")
+	_, err = os.Stat(hb.dir + "/html")
 	if err != nil {
-		if err := os.Mkdir("./html", 0777); err != nil {
+		if err := os.Mkdir(hb.dir+"/html", 0777); err != nil {
 			return err
 		}
 	}
@@ -285,7 +285,7 @@ func (hb *Horsebase) MakeRaceURLList() error {
 	var racelist []string
 	var raceURLlist []string
 
-	file := "./file/racelist.txt"
+	file := hb.dir + "/file/racelist.txt"
 
 	fp, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {

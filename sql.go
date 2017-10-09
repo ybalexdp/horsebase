@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -11,7 +13,7 @@ import (
 )
 
 func (hbdb HBDB) New() (HBDB, error) {
-	_, err := toml.DecodeFile("./file/horsebase.toml", &hbdb)
+	_, err := toml.DecodeFile(path.Dir(os.Args[0])+"/file/horsebase.toml", &hbdb)
 	if err != nil {
 		return hbdb, err
 	}

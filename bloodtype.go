@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"path"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -24,7 +27,7 @@ type SubBloodType struct {
 
 // New generates a BloodTypeToml object
 func (btt BloodTypeToml) New() BloodTypeToml {
-	_, err := toml.DecodeFile("./file/bloodtype.toml", &btt)
+	_, err := toml.DecodeFile(path.Dir(os.Args[0])+"/file/bloodtype.toml", &btt)
 	if err != nil {
 		panic(err)
 	}
