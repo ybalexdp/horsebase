@@ -643,7 +643,13 @@ func (hb *Horsebase) RegistRaceData() error {
 		racedata.Surface = convSurface(data[0][:3])
 
 		//距離,コーナー,コース
-		racedata.getCourseInfo(data)
+		index := strings.Index(data[0], "m")
+		racedata.Distance, _ = strconv.Atoi(data[0][index-4 : index])
+
+		// 障害でなければ
+		if racedata.Surface != 2 {
+			racedata.getCourseInfo(data)
+		}
 
 		// 天気
 		weather := strings.Split(data[1], ":")[1][1:]
@@ -662,7 +668,6 @@ func (hb *Horsebase) RegistRaceData() error {
 		racedata.Day, _ = strconv.Atoi(data[1][6:7])
 
 		// レース年齢
-		var index int
 		grade := getGradeStr(data)
 		racedata.AgeGr, index = getAgeGr(grade)
 
@@ -1347,29 +1352,11 @@ func getAgeGr(grade string) (int, int) {
 
 func (racedata *RaceData) getCourseInfo(data []string) {
 
-	if racedata.Surface == 2 {
-		//障害の場合
-		racedata.Distance, _ = strconv.Atoi(data[0][6:10])
-		return
-	}
-
-	indexcss := 3            //Courseのindex開始値
-	indexcse := indexcss + 3 //Courseのindex終了値
-	indexds := 6             //Distanceのindex開始値
-	indexde := indexds + 4   //Distanceのindex終了値
-
-	if strings.Contains(data[0], "直線") {
-		indexcse = indexcse + 3
-		indexds = indexds + 3
-		indexde = indexde + 3
-	} else if strings.Contains(data[0], "外") || strings.Contains(data[0], "内") {
+	if strings.Contains(data[0], "外") || strings.Contains(data[0], "内") {
 		racedata.Corner = convCorner(data[0][7:10])
-		indexds = indexds + 4
-		indexde = indexde + 4
 	}
 
-	racedata.Course = convCourse(data[0][indexcss:indexcse])
-	racedata.Distance, _ = strconv.Atoi(data[0][indexds:indexde])
+	racedata.Course = convCourse(data[0][3:9])
 }
 
 func (hb *Horsebase) getHorseData(id int) error {
