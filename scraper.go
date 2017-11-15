@@ -1352,11 +1352,13 @@ func getAgeGr(grade string) (int, int) {
 
 func (racedata *RaceData) getCourseInfo(data []string) {
 
-	if strings.Contains(data[0], "外") || strings.Contains(data[0], "内") {
+	if strings.Contains(data[0], "直線") {
+		racedata.Course = convCourse(data[0][3:9])
+	} else if strings.Contains(data[0], "外") || strings.Contains(data[0], "内") {
 		racedata.Corner = convCorner(data[0][7:10])
+		racedata.Course = convCourse(data[0][3:6])
 	}
 
-	racedata.Course = convCourse(data[0][3:9])
 }
 
 func (hb *Horsebase) getHorseData(id int) error {
