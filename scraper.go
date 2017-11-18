@@ -31,7 +31,7 @@ type RaceData struct {
 	RaceNumber int           // Race Number
 	Day        int           // Passed days
 	Surface    int           // 0:芝 1:ダート 2:障害
-	Weather    int           // 0:晴 1:雨 2:雪 3:曇 4:小雨
+	Weather    int           // 0:晴 1:雨 2:雪 3:曇 4:小雨 5:小雪
 	TrackCond  int           // 0:良 1:稍重 2:重 3:不良
 	Horsenum   int           // 出走頭数
 	AgeGr      int           // 0:2歳 1:3歳 2:3歳以上 3:4歳以上 4:その他
@@ -87,7 +87,7 @@ type RaceCardData struct {
 	Turf       string // Turf
 	Day        int    // Passed days
 	Surface    string // 芝/ダート/障害
-	Weather    string // 晴/雨/雪/曇/小雨
+	Weather    string // 晴/雨/雪/曇/小雨/小雪
 	TrackCond  string // 良/稍重/重/不良
 	Horsenum   int    // 出走頭数
 	AgeGr      string // 2歳/3歳/3歳以上/4歳以上
@@ -250,6 +250,7 @@ const (
 	Snowy
 	Cloudy
 	Drizzle
+	LightSnow
 )
 
 const (
@@ -622,7 +623,7 @@ func (hb *Horsebase) RegistRaceData() error {
 
 		//レース番号
 		s := doc.Find("dt").First()
-		racedata.RaceNumber, _ = strconv.Atoi(s.Text()[1:3])
+		racedata.RaceNumber, _ = strconv.Atoi(strings.TrimSpace(s.Text()[1:3]))
 
 		//レース名
 		s = doc.Find("title").First()
@@ -1322,6 +1323,8 @@ func convWeather(weather string) int {
 		return Cloudy
 	case "小雨":
 		return Drizzle
+	case "小雪":
+		return LightSnow
 	default:
 		return -1
 	}
