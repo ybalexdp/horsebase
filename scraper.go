@@ -658,6 +658,11 @@ func (hb *Horsebase) RegistRaceData() error {
 
 		// 馬場状態
 		cond := strings.Split(data[2], ":")[1][1:]
+
+		// 障害レースで芝・ダートコースの場合
+		if len(strings.TrimSpace(cond)) > 6 {
+			cond = strings.Split(cond, "ダ")[0]
+		}
 		racedata.TrackCond = convCond(strings.TrimSpace(cond))
 
 		// 競馬場
