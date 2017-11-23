@@ -30,6 +30,7 @@ type Horsebase struct {
 type Config struct {
 	RaceHtmlPath  string `toml:"race_html_path"`
 	HorseHtmlPath string `toml:"horse_html_path"`
+	CardHtmlPath  string `toml:"card_html_path"`
 	OldestDate    int    `toml:"oldest_date"`
 }
 
@@ -58,6 +59,7 @@ func (hb *Horsebase) New() *Horsebase {
 
 	hb.Config.HorseHtmlPath = hb.dir + hb.Config.HorseHtmlPath
 	hb.Config.RaceHtmlPath = hb.dir + hb.Config.RaceHtmlPath
+	hb.Config.CardHtmlPath = hb.dir + hb.Config.CardHtmlPath
 
 	return hb
 }
@@ -82,6 +84,8 @@ func (hb *Horsebase) Run(args []string) int {
 		match    bool
 		build    bool
 		update   bool
+		prophet  bool
+		jockey   bool
 	)
 
 	flag.Usage = func() {
@@ -112,6 +116,12 @@ func (hb *Horsebase) Run(args []string) int {
 
 	flag.BoolVar(&update, "update", false, "")
 	flag.BoolVar(&update, "u", false, "")
+
+	flag.BoolVar(&prophet, "prophet", false, "")
+	flag.BoolVar(&prophet, "p", false, "")
+
+	flag.BoolVar(&jockey, "jockey", false, "")
+	flag.BoolVar(&jockey, "j", false, "")
 
 	flag.Parse()
 
@@ -209,6 +219,18 @@ func (hb *Horsebase) Run(args []string) int {
 		// Store all data
 	} else if build {
 		if err := hb.build(); err != nil {
+			PrintError(hb.Stderr, "%s", err)
+		}
+		return 1
+
+	} else if prophet {
+		if err := hb.prophet(); err != nil {
+			PrintError(hb.Stderr, "%s", err)
+		}
+		return 1
+
+	} else if jockey {
+		if err := hb.Jockey_batch(); err != nil {
 			PrintError(hb.Stderr, "%s", err)
 		}
 		return 1
@@ -330,6 +352,26 @@ func (hb *Horsebase) destroy() error {
 
 	}
 	return err
+}
+
+func (hb *Horsebase) prophet() error {
+	var err error
+	/*
+		if err = hb.MakeRacecardURLList(); err != nil {
+			return err
+		}
+
+		if err = hb.GetRacecardHTML(); err != nil {
+			return err
+		}
+		return err
+	*/
+
+	if err = hb.RegistRacecardData(); err != nil {
+		return err
+	}
+	return err
+
 }
 
 var help = `usage: horsebase [options]

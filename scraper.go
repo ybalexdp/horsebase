@@ -99,6 +99,7 @@ type RaceCardHorseData struct {
 	RaceID     int     // netkeibaのレースID
 	HorseID    int     // netkeibaの馬ID
 	JockeyID   int     // 騎手ID
+	TrainerID  int     // 厩舎ID
 	Popularity int     // 人気
 	Odds       float64 // 単勝オッズ
 	Age        int     // 年齢
@@ -778,6 +779,8 @@ func (hb *Horsebase) RegistRaceData() error {
 			// 騎手名
 			s = s.Next()
 			jockey.Name, _ = s.Children().Attr("title")
+			jockeyIdUri, _ := s.Children().Attr("href")
+			jockey.JockeyID, _ = strconv.Atoi(strings.Split(jockeyIdUri, "/")[1])
 			hb.DbInfo.InsertJockey(jockey)
 
 			result.JockeyID, err = hb.DbInfo.GetId("jockey", jockey.Name)
@@ -950,6 +953,7 @@ func (hb *Horsebase) RegistRacecardData() error {
 
 	var err error
 	var rchd RaceCardHorseData
+	var horse Horse
 
 	files, err := ioutil.ReadDir(hb.Config.CardHtmlPath)
 	if err != nil {
@@ -1096,34 +1100,49 @@ func (hb *Horsebase) RegistRacecardData() error {
 		doc.Find("div > a").Each(func(_ int, s *goquery.Selection) {
 			horseURL, _ := s.First().Attr("href")
 			if !strings.Contains(horseURL, "javascript") {
-				rchd.HorseID, _ = strconv.Atoi(strings.Split(horseURL, "/")[4])
-				fmt.Println("HorseID:", rchd.HorseID)
-				racecarddata.Horsenum++
+				horseID := strings.Split(horseURL, "/")[4]
+				rchd.HorseID, _ = strconv.Atoi(horseID)
+				horse.HorseID = rchd.HorseID
+				// データ未登録の馬は馬データの登録
+				horseCheck, _ := hb.DbInfo.HorseExistenceCheck(horseID)
+
+				if !horseCheck {
+					hb.DbInfo.InsertHorse(horse)
+
+					// getHorseData内でHTTP GETするため
+					// インターバルをおく
+					time.Sleep(3000 * time.Millisecond)
+					hb.getHorseData(horse.HorseID)
+				}
+
+				rchd.Hnumber++
 
 				// 性別
 				s = s.Parent().Parent().Next()
 				info := s.Text()
 				rchd.Sex = info[0:3]
-				fmt.Println("Sex:" + rchd.Sex)
 
 				// 年齢
 				rchd.Age, _ = strconv.Atoi(info[3:])
-				fmt.Println("Age:", rchd.Age)
 
 				// 斤量
 				s = s.Next()
 				rchd.Bweight, _ = strconv.ParseFloat(s.Text(), 64)
-				fmt.Println("Bweight:", rchd.Bweight)
 
 				// 騎手
 				s = s.Next().Children().First()
 				attr, _ := s.Attr("href")
 				jockeyID := strings.Split(attr, "/")[4]
 				rchd.JockeyID, _ = strconv.Atoi(jockeyID)
-				fmt.Println("JockeyID:", rchd.JockeyID)
+
+				// 厩舎
+				s = s.Parent().Next().Children().First()
+				attr, _ = s.Attr("href")
+				trainerID := strings.Split(attr, "/")[4]
+				rchd.TrainerID, _ = strconv.Atoi(trainerID)
 
 				// 体重
-				s = s.Parent().Next().Next()
+				s = s.Parent().Next()
 				weight := strings.Split(s.Text(), "(")
 				rchd.Weight, err = strconv.Atoi(weight[0])
 				if err == nil {
@@ -1160,6 +1179,70 @@ func (hb *Horsebase) RegistRacecardData() error {
 
 	}
 
+	return err
+}
+
+func (hb *Horsebase) Jockey_batch() error {
+	var err error
+	var jockey Jockey
+	files, err := ioutil.ReadDir(hb.Config.RaceHtmlPath)
+	if err != nil {
+		return err
+	}
+	count := len(files)
+	bar := pb.StartNew(count)
+
+	hb.DbInfo, err = hb.DbInfo.New()
+	if err != nil {
+		PrintError(hb.Stderr, "%s", err)
+		return err
+	}
+	defer hb.DbInfo.db.Close()
+
+	for _, file := range files {
+
+		bar.Increment()
+
+		//レースID取得
+		raceID := strings.Split(file.Name(), ".")[0]
+		if len(raceID) != 12 {
+			continue
+		}
+
+		fp, err := os.Open(hb.Config.RaceHtmlPath + file.Name())
+		if err != nil {
+			return err
+		}
+		defer fp.Close()
+
+		doc, err := goquery.NewDocumentFromReader(fp)
+		if err != nil {
+			return err
+		}
+
+		doc.Find("td.txt_l").Each(func(_ int, s *goquery.Selection) {
+
+			// horseID取得
+			horseIDUri, _ := s.Children().Attr("href")
+			if strings.Contains(horseIDUri, "horse") {
+
+				horseID, _ := strconv.Atoi(strings.Split(horseIDUri, "/")[2])
+
+				// 騎手名
+				s = s.Next().Next().Next().Children().First()
+				jockey.Name, _ = s.Attr("title")
+				jockeyIdUri, _ := s.Attr("href")
+
+				jockey.JockeyID, _ = strconv.Atoi(strings.Split(jockeyIdUri, "/")[2])
+				hb.DbInfo.InsertJockey(jockey)
+
+				hb.DbInfo.JockeyBatch(raceID, horseID, jockey)
+
+			}
+
+		})
+
+	}
 	return err
 }
 

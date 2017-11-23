@@ -89,8 +89,8 @@ func (hbdb HBDB) UpdateHorse(horse Horse) error {
 }
 
 func (hbdb HBDB) InsertJockey(jockey Jockey) error {
-	query := "INSERT INTO jockey(name) SELECT * FROM (SELECT ?) AS TMP WHERE NOT EXISTS(SELECT * FROM jockey WHERE name=?)"
-	_, err := hbdb.db.Exec(query, jockey.Name, jockey.Name)
+	query := "INSERT INTO jockey(id,name) SELECT * FROM (SELECT ?,\"" + jockey.Name + "\") AS TMP WHERE NOT EXISTS(SELECT * FROM jockey WHERE id=?)"
+	_, err := hbdb.db.Exec(query, jockey.JockeyID, jockey.JockeyID)
 	return err
 }
 
@@ -244,7 +244,7 @@ FOREIGN KEY(father_mm_id) REFERENCES stallion(id) ON DELETE SET NULL
 	}
 
 	query = `CREATE TABLE IF NOT EXISTS horsebase.jockey
-(id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+(id INT NOT NULL PRIMARY KEY,
 name VARCHAR(20)
 )`
 
@@ -275,7 +275,7 @@ passing_order3 INT,
 passing_order4 INT,
 belonging INT,
 PRIMARY KEY(id, horse_id),
-FOREIGN KEY(id) REFERENCES racedata(id) ON DELETE RESTRICT,
+FOREIGN KEY(id) REFERENCES racedata(id) ON DELETE CASCADE,
 FOREIGN KEY(horse_id) REFERENCES horse(id) ON DELETE RESTRICT,
 FOREIGN KEY(jockey_id) REFERENCES jockey(id) ON DELETE SET NULL
 )`
@@ -291,7 +291,7 @@ horse_number INT NOT NULL,
 dividend INT,
 popularity INT,
 PRIMARY KEY(race_id, horse_number),
-FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
+FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE CASCADE
 )`
 
 	_, err = db.Exec(query)
@@ -305,7 +305,7 @@ horse_number INT NOT NULL,
 dividend INT,
 popularity INT,
 PRIMARY KEY(race_id, horse_number),
-FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
+FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE CASCADE
 )`
 
 	_, err = db.Exec(query)
@@ -383,6 +383,99 @@ dividend INT,
 popularity INT NOT NULL,
 PRIMARY KEY(race_id, horse_number1, horse_number2, horse_number3),
 FOREIGN KEY(race_id) REFERENCES racedata(id) ON DELETE RESTRICT
+)`
+
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	query = `CREATE TABLE IF NOT EXISTS horsebase.racecarddata
+	(race_id BIGINT NOT NULL PRIMARY KEY,
+	race_num INT,
+	name VARCHAR(20),
+	course VARCHAR(8),
+	corner VARCHAR(8),
+	distance INT,
+	date DATE,
+	grade VARCHAR(8),
+	turf VARCHAR(20),
+	racenumber INT,
+	day INT,
+	surface VARCHAR(8),
+	weather VARCHAR(8),
+	track_cond VARCHAR(8),
+	horsenum INT,
+	age_gr VARCHAR(8),
+	sex_gr VARCHAR(8))ENGINE=InnoDB DEFAULT CHARSET=utf8`
+
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	query = `CREATE TABLE IF NOT EXISTS horsebase.racecard
+(race_id BIGINT NOT NULL,
+waku_num INT NOT NULL,
+horse_num INT NOT NULL,
+horse_id INT NOT NULL,
+sex INT NOT NULL,
+age INT NOT NULL,
+bweight DOUBLE(3,1) NOT NULL,
+jockey_id INT NOT NULL,
+weight INT NOT NULL,
+diff_weight INT NOT NULL,
+odds DOUBLE(5,1) NOT NULL,
+popularity INT NOT NULL,
+PRIMARY KEY(race_id, horse_num),
+FOREIGN KEY(race_id) REFERENCES racecarddata(race_id),
+FOREIGN KEY(horse_id) REFERENCES horse(id),
+FOREIGN KEY(jockey_id) REFERENCES jockey(id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8`
+
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	query = `CREATE TABLE IF NOT EXISTS horsebase.racecard
+(id BIGINT NOT NULL PRIMARY KEY,
+name VARCHAR(20),
+course INT,
+corner INT,
+distance INT,
+grade INT,
+turf VARCHAR(8),
+racenumber INT,
+day INT,
+surface INT,
+weather INT,
+track_cond INT,
+horsenum INT,
+age_gr INT,
+sex_gr INT)`
+
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	query = `CREATE TABLE IF NOT EXISTS horsebase.racecarddata
+(id BIGINT NOT NULL,
+horse_id INT NOT NULL,
+jockey_id INT,
+popularity INT,
+odds DOUBLE(5,1),
+age INT,
+weight INT,
+bweight DOUBLE(3,1),
+horse_num INT,
+waku_num INT,
+sex INT,
+PRIMARY KEY(id, horse_id),
+FOREIGN KEY(id) REFERENCES racedata(id) ON DELETE CASCADE,
+FOREIGN KEY(horse_id) REFERENCES horse(id) ON DELETE RESTRICT,
+FOREIGN KEY(jockey_id) REFERENCES jockey(id) ON DELETE SET NULL
 )`
 
 	_, err = db.Exec(query)
@@ -613,6 +706,12 @@ func createIDX(db *sql.DB) error {
 		return err
 	}
 
+	query = "ALTER TABLE racecard ADD INDEX idx_racecard_raceid(race_id)"
+	_, err = db.Exec(query)
+	if err != nil {
+		return err
+	}
+
 	return err
 
 }
@@ -661,6 +760,12 @@ func (hbdb HBDB) RaceExistenceCheck(raceID string) (bool, error) {
 func (hbdb HBDB) HorseExistenceCheck(horseID string) (bool, error) {
 	query := "SELECT id FROM horse WHERE id = " + horseID
 	return hbdb.rowExists(query)
+}
+
+func (hbdb HBDB) JockeyBatch(raceID string, horseID int, jockey Jockey) error {
+	query := "UPDATE raceresult SET jockey_id=? WHERE id=? AND horse_id=?"
+	_, err := hbdb.db.Exec(query, jockey.JockeyID, raceID, horseID)
+	return err
 }
 
 func (hbdb HBDB) rowExists(query string) (bool, error) {
