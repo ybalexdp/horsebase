@@ -392,3 +392,21 @@ func Test_convWeather(t *testing.T) {
 	}
 
 }
+
+func Test_getGradeStr(t *testing.T) {
+
+	data := strings.Split("2007年9月1日 3回新潟7日目 サラ系3歳以上500万下", "回")
+	grade := getGradeStr(data)
+
+	if grade != "3歳以上500万下" {
+		t.Fatalf("getGradeStr error:%s", grade)
+	}
+
+	data = strings.Split("2007年12月1日 5回阪神1日目 障害3歳以上未勝利", "回")
+	grade = getGradeStr(data)
+
+	if grade != "3歳以上未勝利" {
+		t.Fatalf("getGradeStr error:%s", grade)
+	}
+
+}

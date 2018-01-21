@@ -28,10 +28,11 @@ type Horsebase struct {
 }
 
 type Config struct {
-	RaceHtmlPath  string `toml:"race_html_path"`
-	HorseHtmlPath string `toml:"horse_html_path"`
-	CardHtmlPath  string `toml:"card_html_path"`
-	OldestDate    int    `toml:"oldest_date"`
+	RaceHtmlPath    string `toml:"race_html_path"`
+	HorseHtmlPath   string `toml:"horse_html_path"`
+	TrainerHtmlPath string `toml:"trainer_html_path"`
+	CardHtmlPath    string `toml:"card_html_path"`
+	OldestDate      int    `toml:"oldest_date"`
 }
 
 type HBDB struct {
@@ -356,20 +357,29 @@ func (hb *Horsebase) destroy() error {
 
 func (hb *Horsebase) prophet() error {
 	var err error
-	/*
-		if err = hb.MakeRacecardURLList(); err != nil {
-			return err
-		}
 
-		if err = hb.GetRacecardHTML(); err != nil {
-			return err
-		}
+	if err = hb.MakeRacecardURLList(); err != nil {
 		return err
-	*/
+	}
+
+	if err = hb.GetRacecardHTML(); err != nil {
+		return err
+	}
 
 	if err = hb.RegistRacecardData(); err != nil {
 		return err
 	}
+
+	hb.Config.HorseHtmlPath = "./html/horsecard/"
+
+	if err = hb.RegistHorseData(); err != nil {
+		return err
+	}
+
+	if err = hb.RegistTrainerData(); err != nil {
+		return err
+	}
+
 	return err
 
 }

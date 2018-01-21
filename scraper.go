@@ -89,9 +89,9 @@ type RaceCardData struct {
 	Surface    string // 芝/ダート/障害
 	Weather    string // 晴/雨/雪/曇/小雨/小雪
 	TrackCond  string // 良/稍重/重/不良
-	Horsenum   int    // 出走頭数
 	AgeGr      string // 2歳/3歳/3歳以上/4歳以上
 	SexGr      string // 混合/牝馬限定
+	Date       time.Time
 }
 
 // RaceCardHorseData :出馬表内出走馬データ
@@ -108,7 +108,7 @@ type RaceCardHorseData struct {
 	Bweight    float64 // 斤量
 	Hnumber    int     // 馬番
 	Wnumber    int     // 枠番
-	Sex        string  // 牡/牝/騸
+	Sex        int     // 牡/牝/騸
 	Belonging  int     // 所属 0:関東 1:関西 2:地方 3:外国馬 このレース当時の所属(所属も変更あり)
 }
 
@@ -116,6 +116,13 @@ type RaceCardHorseData struct {
 type Jockey struct {
 	JockeyID int    // netkeibaの騎手ID
 	Name     string // 騎手名
+}
+
+// Trainer :厩舎データ
+type Trainer struct {
+	ID        int    // netkeibaの厩舎ID
+	Name      string // 調教師名
+	Belonging int    // 所属 0:関東 1:関西 2:地方 3:外国
 }
 
 // Stallion :種牡馬データ
@@ -182,6 +189,7 @@ type Trifecta struct {
 
 const (
 	horseURL   = "http://db.netkeiba.com/horse/ped/"
+	trainerURL = "http://db.netkeiba.com/trainer/"
 	baseURL    = "http://db.netkeiba.com"
 	racetopURL = "http://race.netkeiba.com"
 	racetop    = "/?pid=race_top"
@@ -322,7 +330,7 @@ func (hb *Horsebase) GetRaceHTML() error {
 func (hb *Horsebase) GetRacecardHTML() error {
 	var fpr *os.File
 
-	fpr, err := os.Open(hb.dir + "/file/racecarddata.txt")
+	fpr, err := os.OpenFile(hb.dir+"/file/racecard.txt", os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
@@ -361,6 +369,14 @@ func (hb *Horsebase) GetRacecardHTML() error {
 			return err
 		}
 		raceID := getRacecardIDfromHTML((string)(line))
+
+		// ./html/cardフォルダ有無確認
+		_, err = os.Stat(hb.Config.CardHtmlPath)
+		if err != nil {
+			if err := os.Mkdir(hb.Config.CardHtmlPath, 0777); err != nil {
+				return err
+			}
+		}
 
 		getHTML((string)(line), raceID, hb.Config.CardHtmlPath)
 	}
@@ -420,6 +436,11 @@ func (hb *Horsebase) MakeRaceURLList() error {
 func (hb *Horsebase) MakeRacecardURLList() error {
 	var racelist []string
 
+	uri, err := getRaceListURI()
+	if err != nil {
+		return err
+	}
+
 	file := hb.dir + "/file/racecard.txt"
 
 	fp, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0644)
@@ -432,7 +453,7 @@ func (hb *Horsebase) MakeRacecardURLList() error {
 	writer := bufio.NewWriter(fp)
 
 	// netkeiba.comからレースのURL一覧を取得
-	racelist, err = hb.getRacecardList()
+	racelist, err = getRaceCardList(racetopURL + uri)
 	if err != nil {
 		return err
 	}
@@ -460,6 +481,13 @@ func (hb *Horsebase) RegistHorseData() error {
 
 	var horse Horse
 	var stallion [4]Stallion
+
+	_, err := os.Stat(hb.Config.HorseHtmlPath)
+	if err != nil {
+		if err := os.Mkdir(hb.Config.HorseHtmlPath, 0777); err != nil {
+			return err
+		}
+	}
 
 	// 取得済みのHTML読み込み
 	files, err := ioutil.ReadDir(hb.Config.HorseHtmlPath)
@@ -500,7 +528,7 @@ func (hb *Horsebase) RegistHorseData() error {
 			return err
 		}
 
-		if horseCheck {
+		if !horseCheck {
 			fp.Close()
 			continue
 		}
@@ -563,6 +591,82 @@ func (hb *Horsebase) RegistHorseData() error {
 	return err
 }
 
+// 厩舎データを登録する
+func (hb *Horsebase) RegistTrainerData() error {
+
+	var trainer Trainer
+	// 取得済みのHTML読み込み
+
+	// ./html/trainerフォルダ有無確認
+	_, err := os.Stat(hb.Config.TrainerHtmlPath)
+	if err != nil {
+		if err := os.Mkdir(hb.Config.TrainerHtmlPath, 0777); err != nil {
+			return err
+		}
+	}
+
+	files, err := ioutil.ReadDir(hb.Config.TrainerHtmlPath)
+	if err != nil {
+		return err
+	}
+
+	count := len(files)
+	bar := pb.StartNew(count)
+
+	hb.DbInfo, err = hb.DbInfo.New()
+	if err != nil {
+		PrintError(hb.Stderr, "%s", err)
+		return err
+	}
+	defer hb.DbInfo.db.Close()
+
+	for _, file := range files {
+		bar.Increment()
+
+		fp, err := os.Open(hb.Config.TrainerHtmlPath + file.Name())
+		if err != nil {
+			return err
+		}
+		defer fp.Close()
+
+		doc, err := goquery.NewDocumentFromReader(fp)
+		if err != nil {
+			return err
+		}
+
+		trainerID := strings.Split(file.Name(), ".")[0]
+
+		trainer.ID, _ = strconv.Atoi(trainerID)
+
+		trainerCheck, err := hb.DbInfo.TrainerExistenceCheck(trainerID)
+		if err != nil {
+			return err
+		}
+
+		if !trainerCheck {
+			fp.Close()
+			continue
+		}
+
+		s := doc.Find("p.txt_01").First()
+		belonging := strings.Split(strings.TrimSpace(s.Text()), "\n")[1]
+		belonging = strings.TrimSpace(belonging)
+		trainer.Belonging = convBelonging(belonging)
+
+		err = hb.DbInfo.UpdateTrainer(trainer)
+		if err != nil {
+			return err
+		}
+
+		fp.Close()
+
+	}
+
+	bar.FinishPrint("Registed Trainer Data")
+
+	return err
+}
+
 func (hb *Horsebase) RegistRaceData() error {
 
 	var data []string
@@ -619,8 +723,6 @@ func (hb *Horsebase) RegistRaceData() error {
 		if err != nil {
 			return err
 		}
-
-		//fmt.Println("Start:", racedata.RaceID)
 
 		//レース番号
 		s := doc.Find("dt").First()
@@ -954,15 +1056,22 @@ func (hb *Horsebase) RegistRacecardData() error {
 	var err error
 	var rchd RaceCardHorseData
 	var horse Horse
+	var racecarddata RaceCardData
 
 	files, err := ioutil.ReadDir(hb.Config.CardHtmlPath)
 	if err != nil {
 		return err
 	}
 
-	for _, file := range files {
+	uri, err := getRaceListURI()
+	if err != nil {
+		return err
+	}
 
-		var racecarddata RaceCardData
+	prophet_day := strings.Split(uri, "=c")[1]
+	racecarddata.Date, _ = convRaceCardDay(prophet_day)
+
+	for _, file := range files {
 
 		hb.DbInfo, err = hb.DbInfo.New()
 		if err != nil {
@@ -971,6 +1080,19 @@ func (hb *Horsebase) RegistRacecardData() error {
 		}
 		defer hb.DbInfo.db.Close()
 
+		// レースデータは途中でエラーになると次の実行で不整合となるため
+		// 失敗したらロールバックできるようにする
+		hb.DbInfo.tx, err = hb.DbInfo.db.Begin()
+		if err != nil {
+			return err
+		}
+
+		defer func() {
+			if err := recover(); err != nil {
+				hb.DbInfo.tx.Rollback()
+			}
+		}()
+
 		//レースID取得
 		raceID := strings.Split(file.Name(), ".")[0]
 		if len(raceID) != 12 {
@@ -978,8 +1100,7 @@ func (hb *Horsebase) RegistRacecardData() error {
 			continue
 		}
 		racecarddata.RaceID, _ = strconv.Atoi(raceID)
-
-		fmt.Println("RaceID:", racecarddata.RaceID)
+		rchd.RaceID = racecarddata.RaceID
 
 		fp, err := os.Open(hb.Config.CardHtmlPath + file.Name())
 		if err != nil {
@@ -992,29 +1113,21 @@ func (hb *Horsebase) RegistRacecardData() error {
 			return err
 		}
 
-		//fmt.Println("Start:", racedata.RaceID)
-
 		//レース番号
 		s := doc.Find("dl.racedata > dt").First()
-		//fmt.Println("tttt:" + strings.Split(s.Text(), "R")[0][1:])
-		racecarddata.RaceNumber, _ = strconv.Atoi(strings.Split(s.Text(), "R")[0][1:])
 
-		fmt.Println("RaceNumber:", racecarddata.RaceNumber)
+		racecarddata.RaceNumber, _ = strconv.Atoi(strings.Split(s.Text(), "R")[0][1:])
 
 		s = doc.Find("dd > h1").First()
 		racecarddata.Name = s.Text()
-
-		fmt.Println("RaceName:" + racecarddata.Name)
 
 		s = doc.Find("p > span").First()
 
 		data := strings.Split(s.Text(), "/")
 		racecarddata.Surface = data[0][:3]
-		fmt.Println("Surface:" + racecarddata.Surface)
 
 		//距離,コーナー,コース
 		racecarddata.Distance, _ = strconv.Atoi(data[0][3:7])
-		fmt.Println("Distance:", racecarddata.Distance)
 
 		// 天気
 		weather := strings.Split(data[1], "：")
@@ -1023,7 +1136,6 @@ func (hb *Horsebase) RegistRacecardData() error {
 		} else {
 			racecarddata.Weather = "不明"
 		}
-		fmt.Println("Weather:" + racecarddata.Weather)
 
 		// 馬場状態
 		cond := strings.Split(data[2], "：")
@@ -1032,31 +1144,24 @@ func (hb *Horsebase) RegistRacecardData() error {
 		} else {
 			racecarddata.TrackCond = "不明"
 		}
-		fmt.Println("TrackCond:" + racecarddata.TrackCond)
 
 		// 競馬場
 		s = doc.Find("div.race_otherdata").Children().First()
 		other_data := strings.Replace(s.Text(), " ", ",", -1)
 		data = strings.Split(other_data, "回")
 		racecarddata.Turf = data[1][0:6]
-		fmt.Println("Turf:" + racecarddata.Turf)
 
 		racecarddata.Day, _ = strconv.Atoi(data[1][6:7])
-		fmt.Println("Day:", racecarddata.Day)
 
 		// レース年齢
 		data = strings.Split(other_data, ",")
-		fmt.Println("data:" + data[0])
 		if strings.Contains(data[1], "障害") {
 			racecarddata.AgeGr = strings.Split(data[1], "障害")[1]
 		} else {
 			racecarddata.AgeGr = data[1]
 		}
-		fmt.Println("AgeGr:" + racecarddata.AgeGr)
 
 		// レースクラス
-		//gradecheck := strings.Split(data[1], "歳")
-		fmt.Println("other_data:" + other_data)
 		if len(data[2]) > 2 {
 			attr, _ := doc.Find("dd > h1 > img").First().Attr("src")
 			if len(attr) < 1 {
@@ -1079,23 +1184,27 @@ func (hb *Horsebase) RegistRacecardData() error {
 				return fmt.Errorf("Race Grade is unknown")
 			}
 		}
-		fmt.Println("Grade:" + racecarddata.Grade)
 
 		if strings.Contains(s.Next().Text(), "牝") {
 			racecarddata.SexGr = "牝"
 		} else {
 			racecarddata.SexGr = "混"
 		}
-		fmt.Println("SexGr:" + racecarddata.SexGr)
+
+		err = hb.DbInfo.InsertRaceCardData(racecarddata)
+		if err != nil {
+			return err
+		}
 
 		rchd.Hnumber = 0
 		var wakunum []int
-		i := 0
 		doc.Find("tr.bml1").Each(func(_ int, s *goquery.Selection) {
 			s = s.First().Children().First()
 			waku, _ := strconv.Atoi(s.Text())
 			wakunum = append(wakunum, waku)
 		})
+
+		i := 0
 
 		doc.Find("div > a").Each(func(_ int, s *goquery.Selection) {
 			horseURL, _ := s.First().Attr("href")
@@ -1120,7 +1229,7 @@ func (hb *Horsebase) RegistRacecardData() error {
 				// 性別
 				s = s.Parent().Parent().Next()
 				info := s.Text()
-				rchd.Sex = info[0:3]
+				rchd.Sex = convSex(info[0:3])
 
 				// 年齢
 				rchd.Age, _ = strconv.Atoi(info[3:])
@@ -1130,52 +1239,75 @@ func (hb *Horsebase) RegistRacecardData() error {
 				rchd.Bweight, _ = strconv.ParseFloat(s.Text(), 64)
 
 				// 騎手
+				var jockey Jockey
 				s = s.Next().Children().First()
 				attr, _ := s.Attr("href")
 				jockeyID := strings.Split(attr, "/")[4]
 				rchd.JockeyID, _ = strconv.Atoi(jockeyID)
+				jockey.JockeyID = rchd.JockeyID
+				jockey.Name = s.Text()
+
+				hb.DbInfo.InsertJockey(jockey)
 
 				// 厩舎
+				var trainer Trainer
 				s = s.Parent().Next().Children().First()
 				attr, _ = s.Attr("href")
 				trainerID := strings.Split(attr, "/")[4]
 				rchd.TrainerID, _ = strconv.Atoi(trainerID)
+
+				trainer.ID = rchd.TrainerID
+				trainer.Name = s.Text()
+
+				trainerCheck, _ := hb.DbInfo.TrainerExistenceCheck(trainerID)
+
+				if !trainerCheck {
+					// getTrainerData内でHTTP GETするため
+					// インターバルをおく
+					time.Sleep(3000 * time.Millisecond)
+					hb.getTrainerData(trainerID)
+
+					hb.DbInfo.InsertTrainer(trainer)
+				}
 
 				// 体重
 				s = s.Parent().Next()
 				weight := strings.Split(s.Text(), "(")
 				rchd.Weight, err = strconv.Atoi(weight[0])
 				if err == nil {
-					fmt.Println("Weight:", rchd.Weight)
 
 					// 前走体重差
 					diff_weight := strings.Split(weight[1], ")")[0]
 					rchd.DiffWeight, _ = strconv.Atoi(diff_weight)
-					fmt.Println("DiffWeight:", rchd.DiffWeight)
 
 				}
 
 				// オッズ
 				s = s.Next()
 				rchd.Odds, _ = strconv.ParseFloat(s.Text(), 64)
-				fmt.Println("Odds:", rchd.Odds)
 
 				// 人気
 				s = s.Next()
 				rchd.Popularity, _ = strconv.Atoi(s.Text())
-				fmt.Println("Popularty:", rchd.Popularity)
 
 				rchd.Wnumber = wakunum[i]
-				// 枠番
-				fmt.Println("WakuNumber:", rchd.Wnumber)
 				i++
-				// 馬番
 
-				fmt.Println("HorseNumber:", rchd.Hnumber)
+				err = hb.DbInfo.InsertRaceCardHorseData(rchd)
 
 			}
 
 		})
+		if err != nil {
+			return err
+		}
+
+		err = hb.DbInfo.tx.Commit()
+		if err != nil {
+			return err
+		}
+		hb.DbInfo.db.Close()
+		fp.Close()
 
 	}
 
@@ -1291,13 +1423,13 @@ func convAgeGr(agegr string) int {
 
 func convBelonging(bel string) int {
 	switch bel {
-	case "東":
+	case "東", "美浦":
 		return BelongingEast
-	case "西":
+	case "西", "栗東":
 		return BelongingWest
-	case "地":
+	case "地", "地方":
 		return BelongingLocal
-	case "外":
+	case "外", "海外":
 		return BelongingForeign
 	default:
 		return -1
@@ -1459,6 +1591,12 @@ func (hb *Horsebase) getHorseData(id int) error {
 	return err
 }
 
+func (hb *Horsebase) getTrainerData(id string) error {
+	url := trainerURL + id
+	err := getHTML(url, id, hb.Config.TrainerHtmlPath)
+	return err
+}
+
 /*
   HTMLファイル取得
 */
@@ -1551,6 +1689,42 @@ func getRaceDate(text string) time.Time {
 	return time.Date(year, (time.Month)(month), day, 0, 0, 0, 0, time.Local)
 }
 
+func convRaceCardDay(prophet_day string) (time.Time, error) {
+
+	var date time.Time
+	doc, err := goquery.NewDocument(racetopURL + racecard)
+	if err != nil {
+		return date, err
+	}
+
+	var year_str string
+	yearFlag := false
+
+	doc.Find("option").Each(func(_ int, s *goquery.Selection) {
+		if yearFlag {
+			return
+		}
+		_, isSelected := s.Attr("selected")
+		if isSelected {
+			year_str, _ = s.Attr("value")
+			yearFlag = true
+		}
+	})
+
+	year, _ := strconv.Atoi(year_str)
+	month, day := sepCardDay(prophet_day)
+
+	date = time.Date(year, (time.Month)(month), day, 0, 0, 0, 0, time.Local)
+
+	return date, nil
+}
+
+func sepCardDay(prophet_day string) (int, int) {
+	month, _ := strconv.Atoi(prophet_day[:2])
+	day, _ := strconv.Atoi(prophet_day[2:])
+	return month, day
+}
+
 func getRaceIDfromHTML(url string) string {
 	return strings.Split(url, "/")[4]
 }
@@ -1578,10 +1752,10 @@ func (hb *Horsebase) getRaceList() ([]string, error) {
 	return racelist, nil
 }
 
-func (hb *Horsebase) getRacecardList() ([]string, error) {
+func getRaceCardList(url string) ([]string, error) {
 
 	var racelist []string
-	doc, err := goquery.NewDocument(racetopURL + racecard)
+	doc, err := goquery.NewDocument(url)
 	if err != nil {
 		return nil, err
 	}
@@ -1602,6 +1776,25 @@ func (hb *Horsebase) getRacecardList() ([]string, error) {
 	})
 
 	return racelist, nil
+}
+
+func getRaceListURI() (string, error) {
+
+	doc, err := goquery.NewDocument(racetopURL + racecard)
+	if err != nil {
+		return "", err
+	}
+
+	var uri string
+
+	doc.Find("dd > a").Each(func(_ int, s *goquery.Selection) {
+		_, isActive := s.Attr("class")
+		if isActive {
+			uri, _ = s.Attr("href")
+		}
+	})
+
+	return uri, err
 }
 
 func isRaceOldURI(uri string) bool {
@@ -1762,13 +1955,6 @@ func splitHorseNum(ticket string, symbol string) []int {
 	}
 	return horseNum
 }
-
-/*
-func (hb *Horsebase) regStallionInfo(name string) error {
-	err := hb.DbInfo.InsertStallion(name)
-	return err
-}
-*/
 
 func (hb *Horsebase) registDividendInfo(rd RaceData) {
 	for i := range rd.Win.HorseNum {
