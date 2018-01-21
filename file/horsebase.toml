@@ -1,6 +1,8 @@
 [config]
 race_html_path = "/html/race/"
 horse_html_path = "/html/horse/"
+trainer_html_path = "./html/trainer/"
+card_html_path = "/html/card/"
 oldest_date = 20070101  #いつのデータから取得するか
 
 [db]
