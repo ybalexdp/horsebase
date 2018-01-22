@@ -397,4 +397,5 @@ Options:
   --reg_horsedata       Scrape HTML and store horse data in horsebase DB
   --drop_db,-d          Delete horsebase DB
   --match_bloodtype.-m  Map bloodtype data and stallion data defined in bloodtype.toml
+	--update,-u           Collect and store recent race data from last stored data
 `
