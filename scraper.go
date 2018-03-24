@@ -679,6 +679,15 @@ func (hb *Horsebase) RegistRaceData() error {
 	if err != nil {
 		return err
 	}
+
+	oldDir := hb.Config.RaceHtmlPath + "old/"
+	_, err = os.Stat(oldDir)
+	if err != nil {
+		if err := os.Mkdir(oldDir, 0777); err != nil {
+			return err
+		}
+	}
+
 	count := len(files)
 	bar := pb.StartNew(count)
 
@@ -901,6 +910,9 @@ func (hb *Horsebase) RegistRaceData() error {
 
 			// 着差
 			result.DifTime = calcDifTime(result, ftime)
+			if result.Rank == 2 {
+				hb.DbInfo.UpdateDiffTime(result)
+			}
 
 			// 通過順位
 			s = s.Next().Next().Next() // タイム指数不要
@@ -1044,6 +1056,11 @@ func (hb *Horsebase) RegistRaceData() error {
 		}
 		hb.DbInfo.db.Close()
 		fp.Close()
+
+		//不要になったファイルを移動
+		if err := os.Rename(hb.Config.RaceHtmlPath+file.Name(), oldDir+file.Name()); err != nil {
+			return err
+		}
 
 	}
 	bar.FinishPrint("Registed Race Data")

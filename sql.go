@@ -82,6 +82,13 @@ func (hbdb HBDB) InsertHorse(horse Horse) error {
 	return err
 }
 
+func (hbdb HBDB) UpdateDiffTime(result RaceResultData) error {
+	diftime := 0 - result.DifTime
+	query := "UPDATE raceresult SET diftime=? WHERE id=? and rank=1"
+	_, err := hbdb.db.Exec(query, diftime, result.RaceID)
+	return err
+}
+
 func (hbdb HBDB) UpdateHorse(horse Horse) error {
 	query := "UPDATE horse SET father_id=?,father_m_id=?,father_fm_id=?,father_mm_id=? WHERE id=?"
 	_, err := hbdb.db.Exec(query, horse.Father, horse.FatherOfM, horse.FatherOfFM, horse.FatherOfMM, horse.HorseID)
@@ -199,7 +206,7 @@ func (hbdb HBDB) InsertTrifectaData(rd RaceData, i int) error {
 }
 
 func createDB(db *sql.DB) error {
-	_, err := db.Exec("CREATE DATABASE IF NOT EXISTS horsebase")
+	_, err := db.Exec("CREATE DATABASE IF NOT EXISTS horsebase DEFAULT CHARACTER SET utf8_general_ci")
 	db.Close()
 	return err
 }
@@ -260,6 +267,7 @@ father_id INT,
 father_m_id INT,
 father_fm_id INT,
 father_mm_id INT,
+comment VARCHAR(2048),
 FOREIGN KEY(father_id) REFERENCES stallion(id) ON DELETE SET NULL,
 FOREIGN KEY(father_m_id) REFERENCES stallion(id) ON DELETE SET NULL,
 FOREIGN KEY(father_fm_id) REFERENCES stallion(id) ON DELETE SET NULL,
