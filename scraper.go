@@ -746,7 +746,7 @@ func (hb *Horsebase) RegistRaceData() error {
 		racedata.Date = getRaceDate(title[1])
 
 		//レースクラス(重賞の場合)
-		s = doc.Find("h1").First()
+		s = doc.Find("dd > h1").First()
 		var gradeFlag bool
 		gradeFlag, racedata.Grade = getRaceGrade(s.Text())
 
