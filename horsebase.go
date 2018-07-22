@@ -54,8 +54,11 @@ func (hb *Horsebase) New() *Horsebase {
 
 	_, err := toml.DecodeFile(hb.dir+"/file/horsebase.toml", &hb)
 	if err != nil {
-		PrintError(hb.Stderr, "%s", err)
-		os.Exit(1)
+		_, err := toml.DecodeFile("./file/horsebase.toml", &hb)
+		if err != nil {
+			PrintError(hb.Stderr, "%s", err)
+			os.Exit(1)
+		}
 	}
 
 	hb.Config.HorseHtmlPath = hb.dir + hb.Config.HorseHtmlPath
@@ -89,42 +92,44 @@ func (hb *Horsebase) Run(args []string) int {
 		jockey   bool
 	)
 
-	flag.Usage = func() {
+	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	flags.BoolVar(&initdb, "init_db", false, "")
+	flags.BoolVar(&initdb, "i", false, "")
+
+	flags.BoolVar(&regblood, "reg_bloodtype", false, "")
+
+	flags.BoolVar(&list, "list", false, "")
+	flags.BoolVar(&list, "l", false, "")
+
+	flags.BoolVar(&gethtml, "get_racehtml", false, "")
+
+	flags.BoolVar(&regrace, "reg_racedata", false, "")
+
+	flags.BoolVar(&reghorse, "reg_horsedata", false, "")
+
+	flags.BoolVar(&dropdb, "drop_db", false, "")
+	flags.BoolVar(&dropdb, "d", false, "")
+
+	flags.BoolVar(&match, "match_bloodtype", false, "")
+	flags.BoolVar(&match, "m", false, "")
+
+	flags.BoolVar(&build, "build", false, "")
+	flags.BoolVar(&build, "b", false, "")
+
+	flags.BoolVar(&update, "update", false, "")
+	flags.BoolVar(&update, "u", false, "")
+
+	flags.BoolVar(&prophet, "prophet", false, "")
+	flags.BoolVar(&prophet, "p", false, "")
+
+	flags.BoolVar(&jockey, "jockey", false, "")
+	flags.BoolVar(&jockey, "j", false, "")
+
+	flags.Usage = func() {
 		fmt.Println(help)
 	}
-	flag.BoolVar(&initdb, "init_db", false, "")
-	flag.BoolVar(&initdb, "i", false, "")
 
-	flag.BoolVar(&regblood, "reg_bloodtype", false, "")
-
-	flag.BoolVar(&list, "list", false, "")
-	flag.BoolVar(&list, "l", false, "")
-
-	flag.BoolVar(&gethtml, "get_racehtml", false, "")
-
-	flag.BoolVar(&regrace, "reg_racedata", false, "")
-
-	flag.BoolVar(&reghorse, "reg_horsedata", false, "")
-
-	flag.BoolVar(&dropdb, "drop_db", false, "")
-	flag.BoolVar(&dropdb, "d", false, "")
-
-	flag.BoolVar(&match, "match_bloodtype", false, "")
-	flag.BoolVar(&match, "m", false, "")
-
-	flag.BoolVar(&build, "build", false, "")
-	flag.BoolVar(&build, "b", false, "")
-
-	flag.BoolVar(&update, "update", false, "")
-	flag.BoolVar(&update, "u", false, "")
-
-	flag.BoolVar(&prophet, "prophet", false, "")
-	flag.BoolVar(&prophet, "p", false, "")
-
-	flag.BoolVar(&jockey, "jockey", false, "")
-	flag.BoolVar(&jockey, "j", false, "")
-
-	flag.Parse()
+	flags.Parse(args[1:])
 
 	// Create horsebase DB
 	if initdb {
@@ -150,7 +155,7 @@ func (hb *Horsebase) Run(args []string) int {
 		defer hb.DbInfo.db.Close()
 
 		var btt BloodTypeToml
-		btt = btt.New()
+		btt, err = btt.New()
 
 		if err := btt.Btd.RegistBloodType(hb.DbInfo); err != nil {
 			PrintError(hb.Stderr, "%s", err)
@@ -204,7 +209,7 @@ func (hb *Horsebase) Run(args []string) int {
 		defer hb.DbInfo.db.Close()
 
 		var btt BloodTypeToml
-		btt = btt.New()
+		btt, err = btt.New()
 
 		if err := btt.MatchBloodType(hb.DbInfo); err != nil {
 			PrintError(hb.Stderr, "%s", err)
@@ -270,7 +275,7 @@ func (hb *Horsebase) build() error {
 	}
 
 	var btt BloodTypeToml
-	btt = btt.New()
+	btt, err = btt.New()
 
 	if err = btt.MatchBloodType(hb.DbInfo); err != nil {
 		return err
@@ -311,7 +316,7 @@ func (hb *Horsebase) update() error {
 	}
 
 	var btt BloodTypeToml
-	btt = btt.New()
+	btt, err = btt.New()
 
 	if err = btt.MatchBloodType(hb.DbInfo); err != nil {
 		return err
@@ -358,6 +363,21 @@ func (hb *Horsebase) destroy() error {
 func (hb *Horsebase) prophet() error {
 	var err error
 
+	hb.DbInfo, err = hb.DbInfo.New()
+	if err != nil {
+		PrintError(hb.Stderr, "%s", err)
+		return err
+	}
+	defer hb.DbInfo.db.Close()
+
+	if err = hb.DbInfo.DeleteRaceCardHorseData(); err != nil {
+		return err
+	}
+
+	if err = hb.DbInfo.DeleteRaceCardData(); err != nil {
+		return err
+	}
+
 	if err = hb.MakeRacecardURLList(); err != nil {
 		return err
 	}
@@ -396,6 +416,6 @@ Options:
   --reg_racedata        Scrape HTML and store race data in horsebase DB
   --reg_horsedata       Scrape HTML and store horse data in horsebase DB
   --drop_db,-d          Delete horsebase DB
-  --match_bloodtype.-m  Map bloodtype data and stallion data defined in bloodtype.toml
-	--update,-u           Collect and store recent race data from last stored data
+  --match_bloodtype,-m  Map bloodtype data and stallion data defined in bloodtype.toml
+  --update,-u           Collect and store recent race data from last stored data
 `

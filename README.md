@@ -130,5 +130,6 @@ You can define main blood-type and sub blood-type and you can map stallions to i
 --drop_db,-d          # Delete horsebase DB  
 --match_bloodtype,-m  # Map bloodtype data and stallion data defined in bloodtype.toml  
 --update,-u           # Collect and store recent race data from last stored data
+--prophet,-p          # Create data for horsebase-prophet
 
 ```

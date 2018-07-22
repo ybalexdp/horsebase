@@ -344,9 +344,12 @@ func (hb *Horsebase) GetRacecardHTML() error {
 		}
 	}
 
-	// ./html/raceフォルダ有無確認
+	// ./html/racecardフォルダ有無確認
 	_, err = os.Stat(hb.Config.CardHtmlPath)
-	if err != nil {
+	if err == nil {
+		if err := os.RemoveAll(hb.Config.CardHtmlPath); err != nil {
+			return err
+		}
 		if err := os.Mkdir(hb.Config.CardHtmlPath, 0777); err != nil {
 			return err
 		}
@@ -405,13 +408,17 @@ func (hb *Horsebase) MakeRaceURLList() error {
 	if err != nil {
 		return err
 	}
+	count := len(racelist)
+	bar := pb.StartNew(count)
 
 	for _, racelistURL := range racelist {
+		bar.Increment()
 		raceURLlist, err = getRaceURL(racelistURL, raceURLlist)
 		if err != nil {
 			return err
 		}
 	}
+	bar.FinishPrint("Got Race URL list")
 
 	_, err = os.Stat(file)
 	if err != nil {
@@ -440,6 +447,8 @@ func (hb *Horsebase) MakeRacecardURLList() error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(uri)
 
 	file := hb.dir + "/file/racecard.txt"
 
@@ -1138,16 +1147,18 @@ func (hb *Horsebase) RegistRacecardData() error {
 		s = doc.Find("dd > h1").First()
 		racecarddata.Name = s.Text()
 
-		s = doc.Find("p > span").First()
+		s = s.Next()
 
-		data := strings.Split(s.Text(), "/")
-		racecarddata.Surface = data[0][:3]
+		tdata := s.Text()
+		racecarddata.Surface = tdata[:3]
 
 		//距離,コーナー,コース
-		racecarddata.Distance, _ = strconv.Atoi(data[0][3:7])
+		racecarddata.Distance, _ = strconv.Atoi(tdata[3:7])
 
+		tdata = s.Next().Text()
+		data := strings.Split(tdata, "/")
 		// 天気
-		weather := strings.Split(data[1], "：")
+		weather := strings.Split(data[0], "：")
 		if len(weather) > 1 {
 			racecarddata.Weather = strings.TrimSpace(weather[1])
 		} else {
@@ -1155,7 +1166,7 @@ func (hb *Horsebase) RegistRacecardData() error {
 		}
 
 		// 馬場状態
-		cond := strings.Split(data[2], "：")
+		cond := strings.Split(data[1], "：")
 		if len(cond) > 1 {
 			racecarddata.TrackCond = strings.TrimSpace(cond[1])
 		} else {
@@ -1229,6 +1240,9 @@ func (hb *Horsebase) RegistRacecardData() error {
 				horseID := strings.Split(horseURL, "/")[4]
 				rchd.HorseID, _ = strconv.Atoi(horseID)
 				horse.HorseID = rchd.HorseID
+				if horse.HorseID == 0 {
+					return
+				}
 				// データ未登録の馬は馬データの登録
 				horseCheck, _ := hb.DbInfo.HorseExistenceCheck(horseID)
 

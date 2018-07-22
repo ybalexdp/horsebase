@@ -410,3 +410,55 @@ func Test_getGradeStr(t *testing.T) {
 	}
 
 }
+
+func Test_getAgeGr(t *testing.T) {
+
+	grade := "3歳以上1600万下"
+
+	ageGr, index := getAgeGr(grade)
+
+	if ageGr != AgeGrThreeOver {
+		t.Fatalf("getAgeGr error ageGr:%d", ageGr)
+	}
+
+	if index != 10 {
+		t.Fatalf("getAgeGr index:%d", index)
+	}
+
+	grade = "2歳"
+
+	ageGr, index = getAgeGr(grade)
+
+	if ageGr != AgeGrTwo {
+		t.Fatalf("getAgeGr error ageGr:%d", ageGr)
+	}
+
+	if index != 4 {
+		t.Fatalf("getAgeGr index:%d", index)
+	}
+
+	grade = "3歳"
+
+	ageGr, index = getAgeGr(grade)
+
+	if ageGr != AgeGrThree {
+		t.Fatalf("getAgeGr error ageGr:%d", ageGr)
+	}
+
+	if index != 4 {
+		t.Fatalf("getAgeGr index:%d", index)
+	}
+
+	grade = "4歳以上"
+
+	ageGr, index = getAgeGr(grade)
+
+	if ageGr != AgeGrFourOver {
+		t.Fatalf("getAgeGr error ageGr:%d", ageGr)
+	}
+
+	if index != 10 {
+		t.Fatalf("getAgeGr index:%d", index)
+	}
+
+}

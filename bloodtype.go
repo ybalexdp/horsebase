@@ -26,13 +26,16 @@ type SubBloodType struct {
 }
 
 // New generates a BloodTypeToml object
-func (btt BloodTypeToml) New() BloodTypeToml {
+func (btt BloodTypeToml) New() (BloodTypeToml, error) {
 	_, err := toml.DecodeFile(path.Dir(os.Args[0])+"/file/bloodtype.toml", &btt)
 	if err != nil {
-		panic(err)
+		_, err := toml.DecodeFile("./file/bloodtype.toml", &btt)
+		if err != nil {
+			return btt, err
+		}
 	}
 
-	return btt
+	return btt, err
 }
 
 // RegistBloodType store blood-type information according to bloodtype.toml

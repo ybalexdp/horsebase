@@ -15,7 +15,10 @@ import (
 func (hbdb HBDB) New() (HBDB, error) {
 	_, err := toml.DecodeFile(path.Dir(os.Args[0])+"/file/horsebase.toml", &hbdb)
 	if err != nil {
-		return hbdb, err
+		_, err := toml.DecodeFile("./file/horsebase.toml", &hbdb)
+		if err != nil {
+			return hbdb, err
+		}
 	}
 	hbdb.db, err = sql.Open("mysql", hbdb.DbUser+":"+hbdb.DbPass+"@/horsebase")
 	if err != nil {
@@ -65,6 +68,18 @@ func (hbdb HBDB) DropDB() error {
 
 func (hbdb HBDB) DeleteBloodType() error {
 	query := "DELETE FROM bloodtype"
+	_, err := hbdb.db.Exec(query)
+	return err
+}
+
+func (hbdb HBDB) DeleteRaceCardHorseData() error {
+	query := "DELETE FROM racecardhorsedata"
+	_, err := hbdb.db.Exec(query)
+	return err
+}
+
+func (hbdb HBDB) DeleteRaceCardData() error {
+	query := "DELETE FROM racecarddata"
 	_, err := hbdb.db.Exec(query)
 	return err
 }
@@ -138,7 +153,7 @@ func (hbdb HBDB) InsertRaceresult(rrd RaceResultData) error {
 	stime := rrd.Time.String()
 	stime = strings.Split(stime, "+")[0]
 
-	query := "INSERT INTO raceresult VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+	query := "INSERT INTO raceresult VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,null)"
 	_, err := hbdb.tx.Exec(query, rrd.RaceID, rrd.HorseID, rrd.Rank, rrd.JockeyID, rrd.Popularity, rrd.Odds, rrd.Age,
 		rrd.Weight, rrd.Bweight, rrd.Hnumber, rrd.Wnumber, rrd.LastThreeFur, rrd.Sex, stime, rrd.DifTime,
 		rrd.POrder[0], rrd.POrder[1], rrd.POrder[2], rrd.POrder[3], rrd.Belonging)
@@ -321,6 +336,7 @@ passing_order2 INT,
 passing_order3 INT,
 passing_order4 INT,
 belonging INT,
+comment VARCHAR(2048),
 PRIMARY KEY(id, horse_id),
 FOREIGN KEY(id) REFERENCES racedata(id) ON DELETE CASCADE,
 FOREIGN KEY(horse_id) REFERENCES horse(id) ON DELETE RESTRICT,
