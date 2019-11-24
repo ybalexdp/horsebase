@@ -9,58 +9,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-/*
-func Test_GetRaceHTML(t *testing.T) {
-	hb := &Horsebase{}
-	hb = hb.New()
-
-	err := hb.GetRaceHTML()
-	if err != nil {
-		t.Fatalf("MakeRaceURLList error:%s", err)
-	}
-
-	if err != nil {
-		t.Fatalf("GetRaceHTML error:%s", err)
-}
-*/
-
-/*
-func Test_MakeRaceURLList(t *testing.T) {
-	hb := &Horsebase{}
-	hb = hb.New()
-
-	err := hb.MakeRaceURLList()
-	if err != nil {
-		t.Fatalf("MakeRaceURLList error:%s", err)
-	}
-}
-*/
-
-/*
-func Test_RegistHorseData(t *testing.T) {
-	hb := &Horsebase{}
-	hb = hb.New()
-
-	err := hb.RegistHorseData()
-	if err != nil {
-		t.Fatalf("RegistHorseData error:%s", err)
-	}
-}
-*/
-
-/*
-func Test_RegistRaceData(t *testing.T) {
-	hb := &Horsebase{}
-	hb = hb.New()
-
-	err := hb.RegistRaceData()
-	if err != nil {
-		t.Fatalf("RegistRaceData error:%s", err)
-	}
-
-}
-*/
-
 func Test_getRaceIDfromHTML(t *testing.T) {
 
 	hb := &Horsebase{}
